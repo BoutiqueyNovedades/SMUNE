@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+Roles
+
+{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between mb-4">
+
+<h2>
+
+<i class="bi bi-person-badge"></i>
+
+Roles
+
+</h2>
+
+<a
+href="{{ url_for('nuevo_rol') }}"
+class="btn btn-success">
+
+Nuevo Rol
+
+</a>
+
+</div>
+
+<table class="table table-hover">
+
+<thead>
+
+<tr>
+
+<th>Nombre</th>
+
+<th>Empresa</th>
+
+<th>Usuarios</th>
+
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for r in roles %}
+
+<tr>
+
+<td>
+
+{{ r.nombre }}
+
+</td>
+
+<td>
+
+{{ r.empresa.nombre }}
+
+</td>
+
+<td>
+
+{{ r.usuarios|length }}
+
+</td>
+
+<td>
+
+<a
+class="btn btn-warning btn-sm">
+
+Editar
+
+</a>
+
+<a
+class="btn btn-primary btn-sm"
+
+href="{{ url_for('permisos_rol', id=r.id) }}">
+
+<i class="bi bi-shield-lock"></i>
+
+Permisos
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}

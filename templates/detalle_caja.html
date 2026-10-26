@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <h3><i class="bi bi-journal-text"></i> Jornada #{{ caja.id }} — {{ caja.unidad.nombre if caja.unidad }}</h3>
+  <a href="{{ url_for('caja_historial') }}" class="btn btn-outline-secondary btn-sm">Historial</a>
+  {% if current_user.administrador_principal %}
+  <a href="{{ url_for('exportar_historial_caja') }}" class="btn btn-outline-success btn-sm">Exportar CSV</a>
+  {% endif %}
+</div>
+{% if caja.abierta %}
+<span class="badge bg-success">Abierta</span>
+{% else %}
+<span class="badge bg-dark">Cerrada: solo lectura</span>
+{% endif %}
+<p class="mt-2 text-muted">
+  Apertura: {{ caja.fecha_apertura.strftime('%d/%m/%Y %H:%M') }}
+  {% if caja.fecha_cierre %} · Cierre: {{ caja.fecha_cierre.strftime('%d/%m/%Y %H:%M') }}{% endif %}
+  · Abrió: {{ caja.usuario.nombre if caja.usuario }}
+</p>
+
+<div class="row g-3">
+  <div class="col-md-3"><div class="card"><div class="card-body">Saldo inicial<h5>${{ '%.2f'|format(caja.fondo_inicial or 0) }}</h5></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body">Ventas<h5>${{ '%.2f'|format(resumen.total_ventas) }}</h5></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body">Debe tener en caja<h5>${{ '%.2f'|format(resumen.esperado) }}</h5></div></div></div>
+  {% if es_gerente and not caja.abierta %}
+  <div class="col-md-3"><div class="card"><div class="card-body">Contado / Diferencia
+    <h5>${{ '%.2f'|format(caja.efectivo_final or 0) }} / ${{ '%.2f'|format(caja.diferencia or 0) }}</h5></div></div></div>
+  {% endif %}
+</div>
+
+<p class="mt-3 small">
+  Por método:
+  {% for k, v in resumen.por_metodo.items() %}{{ k }} ${{ '%.2f'|format(v) }}{% if not loop.last %} · {% endif %}{% endfor %}
+  | Entradas ${{ '%.2f'|format(resumen.entradas) }} · Salidas ${{ '%.2f'|format(resumen.salidas) }}
+  | Cancelado ${{ '%.2f'|format(resumen.total_cancelado) }}
+</p>
+
+{% include "_jornada_ventas.html" %}
+
+<h5 class="mt-4">Apartados de la jornada</h5>
+<table class="table table-sm">
+  <thead><tr><th>Folio</th><th>Fecha</th><th>Total</th><th>Saldo</th><th>Estado</th></tr></thead>
+  <tbody>
+  {% for a in resumen.apartados %}
+    <tr><td><a href="{{ url_for('detalle_apartado', id=a.id) }}">{{ a.numero_apartado }}</a></td>
+        <td>{{ a.fecha.strftime('%d/%m/%Y %H:%M') if a.fecha }}</td>
+        <td>${{ '%.2f'|format(a.total or 0) }}</td><td>${{ '%.2f'|format(a.saldo or 0) }}</td><td>{{ a.estado }}</td></tr>
+  {% else %}
+    <tr><td colspan="5" class="text-muted">Sin apartados.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% if es_gerente %}
+<h5 class="mt-4">Registro de movimientos</h5>
+<table class="table table-sm">
+  <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Usuario</th><th>Observaciones</th></tr></thead>
+  <tbody>
+  {% for m in resumen.movimientos %}
+    <tr><td>{{ m.fecha.strftime('%d/%m %H:%M') if m.fecha }}</td><td>{{ m.tipo }}</td>
+        <td>${{ '%.2f'|format(m.monto or 0) }}</td><td>{{ m.usuario.nombre if m.usuario }}</td><td>{{ m.observaciones }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

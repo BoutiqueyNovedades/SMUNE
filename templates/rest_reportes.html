@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>Utilidad del restaurante {% if consolidado %}<small class="text-muted">(consolidado)</small>{% endif %}</h3>
+    {% include "_giro_selector.html" %}
+    <form method="get" class="row g-2 mb-3">
+        <input type="hidden" name="unidad_id" value="{{ 'todas' if consolidado else unidad.id }}">
+        <div class="col-auto"><input class="form-control" type="date" name="desde" value="{{ desde }}"></div>
+        <div class="col-auto"><input class="form-control" type="date" name="hasta" value="{{ hasta }}"></div>
+        <div class="col-auto"><button class="btn btn-primary">Filtrar</button></div>
+        {% if unidades_sel %}<div class="col-auto"><a class="btn btn-outline-secondary" href="?unidad_id=todas&desde={{ desde }}&hasta={{ hasta }}">Todas las unidades</a></div>{% endif %}
+    </form>
+    <div class="row text-center mb-3">
+        <div class="col"><div class="card p-2">Ventas<br><strong>${{ '%.2f'|format(ventas) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Costo platillos<br><strong>${{ '%.2f'|format(costo) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Mermas<br><strong>${{ '%.2f'|format(mermas) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Utilidad<br><strong>${{ '%.2f'|format(utilidad) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Propinas<br><strong>${{ '%.2f'|format(propinas) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Pedidos<br><strong>{{ pedidos }}</strong></div></div>
+    </div>
+    {% if consolidado %}
+    <h5>Por unidad</h5>
+    <table class="table table-sm"><thead><tr><th>Unidad</th><th>Pedidos</th><th>Ventas</th><th>Costo</th><th>Utilidad</th></tr></thead><tbody>
+    {% for u in unidades %}<tr><td>{{ u.nombre }}</td><td>{{ u.pedidos }}</td><td>${{ '%.2f'|format(u.ventas) }}</td><td>${{ '%.2f'|format(u.costo) }}</td><td>${{ '%.2f'|format(u.utilidad) }}</td></tr>{% endfor %}
+    </tbody></table>
+    {% endif %}
+    <h5>Por platillo</h5>
+    <table class="table table-sm table-striped"><thead><tr><th>Platillo</th><th>Cant.</th><th>Ventas</th><th>Costo</th><th>Utilidad</th></tr></thead><tbody>
+    {% for f in platillos %}<tr><td>{{ f.nombre }}</td><td>{{ f.cantidad }}</td><td>${{ '%.2f'|format(f.ventas) }}</td><td>${{ '%.2f'|format(f.costo) }}</td><td>${{ '%.2f'|format(f.utilidad) }}</td></tr>
+    {% else %}<tr><td colspan="5" class="text-muted">Sin ventas en el periodo.</td></tr>{% endfor %}
+    </tbody></table>
+</div>
+{% endblock %}

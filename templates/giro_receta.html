@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <a href="{{ url_for(volver) }}">&larr; Volver</a>
+    <h3>{{ nombre }}</h3>
+    {% include "_giro_selector.html" %}
+    <p>Precio: ${{ '%.2f'|format(precio or 0) }} · Costo de receta: <strong>${{ '%.2f'|format(costo) }}</strong></p>
+    <form method="post" action="{{ agregar }}" class="row g-2 mb-4">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-4"><select class="form-select" name="insumo_id" required>
+            {% for i in insumos %}<option value="{{ i.id }}">{{ i.nombre }} ({{ i.unidad_medida }})</option>{% endfor %}
+        </select></div>
+        <div class="col-md-3"><input class="form-control" name="cantidad" type="number" step="any" min="0" placeholder="Cantidad" required></div>
+        <div class="col-md-2"><button class="btn btn-primary">Agregar / actualizar</button></div>
+    </form>
+    <table class="table table-sm table-striped">
+        <thead><tr><th>Insumo</th><th>Cantidad</th><th>Costo</th><th></th></tr></thead>
+        <tbody>
+        {% for it in items %}
+        <tr><td>{{ it.insumo.nombre }}</td><td>{{ '%.3f'|format(it.cantidad) }} {{ it.insumo.unidad_medida }}</td>
+            <td>${{ '%.2f'|format(it.cantidad * it.insumo.costo_promedio) }}</td>
+            <td><form method="post" action="{{ url_for(quitar, id=pid, item_id=it.id) }}"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-sm btn-outline-danger">Quitar</button></form></td></tr>
+        {% else %}<tr><td colspan="4" class="text-muted">Sin ingredientes.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

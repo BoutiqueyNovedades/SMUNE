@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container-fluid py-4">
+
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<div>
+			<h2 class="fw-bold mb-1">
+				<i class="bi bi-pencil-square"></i>
+				Editar unidad de negocio
+			</h2>
+			<p class="text-muted mb-0">
+				Empresa: <strong>{{ empresa.nombre }}</strong>
+			</p>
+		</div>
+
+		<a
+			href="{{ url_for('administrar_unidad', id=unidad.id) }}"
+			class="btn btn-secondary"
+		>
+			<i class="bi bi-arrow-left"></i>
+			Regresar
+		</a>
+	</div>
+
+	<div class="card shadow-sm">
+		<div class="card-header bg-primary text-white">
+			<h5 class="mb-0">
+				<i class="bi bi-building"></i>
+				Información de la unidad
+			</h5>
+		</div>
+
+		<div class="card-body">
+			<form
+				method="POST"
+				action="{{ url_for('editar_unidad', id=unidad.id) }}"
+			>
+				<div class="row g-4">
+					<div class="col-md-6">
+						<label class="form-label fw-bold" for="nombre">
+							Nombre de la unidad
+						</label>
+						<input
+							id="nombre"
+							type="text"
+							name="nombre"
+							class="form-control"
+							value="{{ unidad.nombre }}"
+							required
+						>
+					</div>
+
+					<div class="col-md-6">
+						<label class="form-label fw-bold" for="telefono">
+							Teléfono
+						</label>
+						<input
+							id="telefono"
+							type="text"
+							name="telefono"
+							class="form-control"
+							value="{{ unidad.telefono or '' }}"
+						>
+					</div>
+
+					<div class="col-md-6">
+						<label class="form-label fw-bold" for="correo">Correo</label>
+						<input id="correo" type="email" name="correo" class="form-control" value="{{ unidad.correo or '' }}">
+					</div>
+
+					<div class="col-12">
+						<label class="form-label fw-bold" for="direccion">Dirección</label>
+						<textarea id="direccion" name="direccion" class="form-control">{{ unidad.direccion or '' }}</textarea>
+					</div>
+				</div>
+
+				<hr class="my-4">
+
+				<button type="submit" class="btn btn-success">
+					<i class="bi bi-check-circle"></i>
+					Guardar cambios
+				</button>
+				<a
+					href="{{ url_for('administrar_unidad', id=unidad.id) }}"
+					class="btn btn-secondary"
+				>
+					Cancelar
+				</a>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

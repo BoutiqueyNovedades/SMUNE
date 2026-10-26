@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>{{ 'Mermas' if pref == 'rest' else 'Desperdicio de materiales' }}</h3>
+    {% include "_giro_selector.html" %}
+    <form method="post" action="{{ url_for(pref ~ '_merma_nueva') }}" class="row g-2 mb-4">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-3"><select class="form-select" name="insumo_id" required>
+            {% for i in insumos %}<option value="{{ i.id }}">{{ i.nombre }} ({{ '%.2f'|format(i.existencia) }} {{ i.unidad_medida }})</option>{% endfor %}
+        </select></div>
+        <div class="col-md-2"><input class="form-control" name="cantidad" type="number" step="any" min="0" placeholder="Cantidad" required></div>
+        <div class="col-md-5"><input class="form-control" name="motivo" placeholder="Motivo"></div>
+        <div class="col-md-2"><button class="btn btn-danger">Registrar</button></div>
+    </form>
+    <table class="table table-sm table-striped">
+        <thead><tr><th>Fecha</th><th>Insumo</th><th>Cantidad</th><th>Costo</th><th>Motivo</th></tr></thead>
+        <tbody>
+        {% for h in historial %}
+        <tr><td>{{ h.fecha.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ h.insumo.nombre }}</td><td>{{ '%.2f'|format(-h.cantidad) }}</td>
+            <td>${{ '%.2f'|format(-h.cantidad * h.costo_unitario) }}</td><td>{{ h.observaciones }}</td></tr>
+        {% else %}<tr><td colspan="5" class="text-muted">Sin mermas.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

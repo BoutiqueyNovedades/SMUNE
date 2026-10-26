@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}
+Administración de Unidades
+{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h2>
+        <i class="bi bi-building"></i>
+        Administración de Unidades de Negocio
+    </h2>
+
+    <a href="{{ url_for('nueva_unidad_negocio') }}"
+       class="btn btn-success">
+
+        <i class="bi bi-plus-circle"></i>
+        Nueva Unidad
+
+    </a>
+
+</div>
+
+
+<div class="row mb-4">
+
+    <div class="col-md-3">
+
+        <div class="card border-primary shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h6>Total Unidades</h6>
+
+                <h2>{{ total_unidades }}</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-success shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h6>Unidades Activas</h6>
+
+                <h2>{{ unidades_activas }}</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-warning shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h6>Usuarios</h6>
+
+                <h2>{{ total_usuarios }}</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-info shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h6>Productos</h6>
+
+                <h2>{{ total_productos }}</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="row">
+
+{% for unidad in unidades %}
+
+<div class="col-lg-4 mb-4">
+
+<div class="card shadow h-100">
+
+<div class="card-header bg-dark text-white">
+
+<h5 class="mb-0">
+
+<i class="bi bi-building"></i>
+
+{{ unidad.nombre }}
+
+</h5>
+
+</div>
+
+<div class="card-body">
+
+<p>
+
+<strong>Descripción:</strong><br>
+
+{{ unidad.descripcion or "Sin descripción" }}
+
+</p>
+
+<p>
+
+<strong>Responsable:</strong><br>
+
+{{ unidad.responsable or "-" }}
+
+</p>
+
+<p>
+
+<strong>Teléfono:</strong><br>
+
+{{ unidad.telefono or "-" }}
+
+</p>
+
+<p>
+
+<strong>Correo:</strong><br>
+
+{{ unidad.correo or "-" }}
+
+</p>
+
+<p>
+
+<strong>Estado:</strong>
+
+{% if unidad.activo %}
+
+<span class="badge bg-success">
+
+Activa
+
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+
+Inactiva
+
+</span>
+
+{% endif %}
+
+</p>
+
+</div>
+
+<div class="card-footer">
+
+<div class="d-grid gap-2">
+
+<a class="btn btn-primary"
+
+href="{{ url_for('modulos_unidad', id=unidad.id) }}">
+
+<i class="bi bi-grid"></i>
+
+Administrar módulos
+
+</a>
+
+<a class="btn btn-secondary"
+   href="{{ url_for('usuarios_unidad', id=unidad.id) }}">
+
+    <i class="bi bi-people"></i>
+
+    Administrar usuarios
+
+</a>
+
+<a class="btn btn-success"
+href="{{ url_for('panel_unidad', id=unidad.id) }}">
+
+<i class="bi bi-speedometer2"></i>
+
+Panel de Unidad
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<div class="card shadow-sm mt-4">
+
+<div class="card-header">
+
+<h5 class="mb-0">
+
+Listado General
+
+</h5>
+
+</div>
+
+<div class="card-body">
+
+<table class="table table-hover">
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Nombre</th>
+
+<th>Estado</th>
+
+<th>Serie Ventas</th>
+
+<th>Serie Compras</th>
+
+<th>Serie Apartados</th>
+
+<th>Acciones</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for unidad in unidades %}
+
+<tr>
+
+<td>{{ unidad.id }}</td>
+
+<td>{{ unidad.nombre }}</td>
+
+<td>
+
+{% if unidad.activo %}
+
+<span class="badge bg-success">
+
+Activa
+
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+
+Inactiva
+
+</span>
+
+{% endif %}
+
+</td>
+
+<td>{{ unidad.serie_ventas }}</td>
+
+<td>{{ unidad.serie_compras }}</td>
+
+<td>{{ unidad.serie_apartados }}</td>
+
+<td>
+
+<a class="btn btn-info btn-sm"
+
+href="{{ url_for('modulos_unidad', id=unidad.id) }}">
+
+<i class="bi bi-grid"></i>
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

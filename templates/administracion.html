@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}
+Administración
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container-fluid">
+
+<h2 class="mb-4">
+
+<i class="bi bi-building-fill-gear"></i>
+
+Administración General
+
+</h2>
+
+<div class="row mb-4">
+
+<div class="col-md-4">
+
+<div class="card border-primary shadow">
+
+<div class="card-body">
+
+<h5>Unidades</h5>
+
+<h2>{{ total_unidades }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card border-success shadow">
+
+<div class="card-body">
+
+<h5>Usuarios</h5>
+
+<h2>{{ total_usuarios }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card border-warning shadow">
+
+<div class="card-body">
+
+<h5>Productos</h5>
+
+<h2>{{ total_productos }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="d-flex justify-content-between mb-3">
+
+<h4>Unidades de negocio</h4>
+
+<a class="btn btn-success"
+href="{{ url_for('nueva_unidad_negocio') }}">
+
+<i class="bi bi-plus-circle"></i>
+
+Nueva Unidad
+
+</a>
+
+</div>
+
+<div class="row">
+
+{% for unidad in unidades %}
+
+<div class="col-md-4 mb-4">
+
+<div class="card shadow h-100">
+
+<div class="card-header">
+
+<strong>
+
+{{ unidad.nombre }}
+
+</strong>
+
+</div>
+
+<div class="card-body">
+
+<p>
+
+{{ unidad.descripcion }}
+
+</p>
+
+<p>
+
+<b>Responsable:</b>
+
+{{ unidad.responsable or "Sin asignar" }}
+
+</p>
+
+<p>
+
+<b>Teléfono:</b>
+
+{{ unidad.telefono or "-" }}
+
+</p>
+
+<p>
+
+<b>Correo:</b>
+
+{{ unidad.correo or "-" }}
+
+</p>
+
+{% if unidad.activo %}
+
+<span class="badge bg-success">
+
+Activa
+
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+
+Inactiva
+
+</span>
+
+{% endif %}
+
+</div>
+
+<div class="card-footer text-center">
+
+<a class="btn btn-primary btn-sm"
+
+href="{{ url_for('editar_unidad_negocio',
+
+id=unidad.id) }}">
+
+<i class="bi bi-pencil-square"></i>
+
+Editar
+
+</a>
+
+<a class="btn btn-info btn-sm"
+
+href="{{ url_for('modulos_unidad',
+
+id=unidad.id) }}">
+
+<i class="bi bi-grid"></i>
+
+Módulos
+
+</a>
+
+<a class="btn btn-secondary btn-sm"
+
+href="{{ url_for('usuarios_unidad',
+
+id=unidad.id) }}">
+
+<i class="bi bi-people"></i>
+
+Usuarios
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+{% endblock %}

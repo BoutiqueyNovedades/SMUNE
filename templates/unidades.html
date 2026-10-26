@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container-fluid py-4">
+
+    <!-- ===================================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            {% if current_user.administrador_principal %}
+
+                <h2 class="fw-bold">
+                    <i class="bi bi-diagram-3"></i>
+                    UNIDADES DE NEGOCIO
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Administración corporativa de unidades de negocio
+                </p>
+
+            {% else %}
+
+                <h2 class="fw-bold">
+                    <i class="bi bi-diagram-3"></i>
+                    UNIDADES DE NEGOCIO
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Unidades de negocio de tu empresa
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        {% if current_user.administrador_principal %}
+
+            {% if empresa is defined and empresa %}
+                {% if empresa.activa %}
+                    <a
+                        href="{{ url_for('nueva_unidad', empresa_id=empresa.id) }}"
+                        class="btn btn-success"
+                    >
+                        <i class="bi bi-plus-circle"></i>
+                        Nueva Unidad
+                    </a>
+                {% else %}
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        disabled
+                    >
+                        <i class="bi bi-lock"></i>
+                        Empresa suspendida
+                    </button>
+                {% endif %}
+            {% else %}
+                <a
+                    href="{{ url_for('empresas') }}"
+                    class="btn btn-success"
+                >
+                    <i class="bi bi-plus-circle"></i>
+                    Seleccionar empresa
+                </a>
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- TABLA -->
+    <!-- ===================================================== -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>ID</th>
+
+                            {% if current_user.administrador_principal %}
+                                <th>Empresa</th>
+                            {% endif %}
+
+                            <th>Nombre</th>
+
+                            <th>Teléfono</th>
+
+                            <th>Estado</th>
+
+                            <th>Acciones</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                    {% for unidad in unidades %}
+
+                        <tr>
+
+                            <!-- ID -->
+
+                            <td>
+                                {{ unidad.id }}
+                            </td>
+
+
+                            <!-- EMPRESA -->
+
+                            {% if current_user.administrador_principal %}
+
+                                <td>
+
+                                    {% if unidad.empresa %}
+
+                                        {{ unidad.empresa.nombre }}
+
+                                    {% else %}
+
+                                        <span class="text-muted">
+                                            Sin empresa
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            {% endif %}
+
+
+                            <!-- NOMBRE -->
+
+                            <td>
+
+                                <strong>
+                                    {{ unidad.nombre }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- TELÉFONO -->
+
+                            <td>
+
+                                {{ unidad.telefono or "-" }}
+
+                            </td>
+
+
+                            <!-- ESTADO -->
+
+                            <td>
+
+                                {% if unidad.activa %}
+
+                                    <span class="badge bg-success">
+                                        Activa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger">
+                                        Inactiva
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- ACCIONES -->
+
+                            <td>
+
+                                <div class="d-flex flex-wrap gap-2">
+
+                                    <!-- ADMINISTRAR -->
+
+                                    <a
+                                        href="{{ url_for(
+                                            'administrar_unidad',
+                                            id=unidad.id
+                                        ) }}"
+                                        class="btn btn-primary btn-sm"
+                                    >
+
+                                        <i class="bi bi-gear"></i>
+
+                                        Administrar
+
+                                    </a>
+
+
+                                    {% if current_user.administrador_principal %}
+
+                                    <!-- EDITAR -->
+
+                                    <a
+                                        href="{{ url_for(
+                                            'editar_unidad',
+                                            id=unidad.id
+                                        ) }}"
+                                        class="btn btn-warning btn-sm"
+                                    >
+
+                                        <i class="bi bi-pencil"></i>
+
+                                        Editar
+
+                                    </a>
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for(
+                                            'cambiar_estado_unidad',
+                                            id=unidad.id
+                                        ) }}"
+                                        class="d-inline"
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm {% if unidad.activa %}btn-danger{% else %}btn-success{% endif %}"
+                                            onclick="return confirm('{% if unidad.activa %}¿Deseas desactivar esta unidad?{% else %}¿Deseas activar esta unidad?{% endif %}');"
+                                        >
+                                            {% if unidad.activa %}
+                                                <i class="bi bi-pause-circle"></i>
+                                                Desactivar
+                                            {% else %}
+                                                <i class="bi bi-play-circle"></i>
+                                                Activar
+                                            {% endif %}
+                                        </button>
+                                    </form>
+
+                                    {% endif %}
+
+
+                                    <!-- USUARIOS -->
+
+                                    {% if current_user.administrador_principal or current_user.rol == 'ADMIN' %}
+
+                                        <a
+                                            href="{{ url_for(
+                                                'usuarios_unidad',
+                                                id=unidad.id
+                                            ) }}"
+                                            class="btn btn-primary btn-sm"
+                                        >
+
+                                            <i class="bi bi-people"></i>
+
+                                            Usuarios
+
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                    {% else %}
+
+                        <tr>
+
+                            <td
+                                colspan="{% if current_user.administrador_principal %}6{% else %}5{% endif %}"
+                                class="text-center text-muted py-4"
+                            >
+
+                                <i class="bi bi-info-circle"></i>
+
+                                No existen unidades de negocio.
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

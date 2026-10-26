@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}
+Detalle Compra
+{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between mb-3">
+
+<h2>
+
+Detalle de Compra
+
+</h2>
+
+<a href="{{ url_for('compras') }}"
+class="btn btn-secondary">
+
+Regresar
+
+</a>
+
+</div>
+
+<div class="card mb-3">
+
+<div class="card-body">
+
+<p>
+
+<strong>Folio:</strong>
+
+{{ compra.numero_compra }}
+
+</p>
+
+<p>
+
+<strong>Fecha:</strong>
+
+{{ compra.fecha.strftime("%d/%m/%Y %H:%M") }}
+
+</p>
+
+<p>
+
+<strong>Proveedor:</strong>
+
+{{ compra.proveedor.nombre }}
+
+</p>
+
+<p>
+
+<strong>Usuario:</strong>
+
+{{ compra.usuario.nombre }}
+
+</p>
+
+</div>
+
+</div>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Producto</th>
+
+<th>Cantidad</th>
+
+<th>Costo</th>
+
+<th>Subtotal</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for d in detalles %}
+
+<tr>
+
+<td>
+
+{{ d.producto.nombre }}
+
+</td>
+
+<td>
+
+{{ d.cantidad }}
+
+</td>
+
+<td>
+
+${{ "%.2f"|format(d.precio_unitario) }}
+
+</td>
+
+<td>
+
+${{ "%.2f"|format(d.subtotal) }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<div class="text-end">
+
+<h3>
+
+Total:
+
+${{ "%.2f"|format(compra.total) }}
+
+</h3>
+
+</div>
+{% endblock %}

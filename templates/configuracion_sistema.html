@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mt-3"><i class="bi bi-gear"></i> Configuración del sistema</h3>
+<p class="text-muted">Hora del servidor: {{ ahora.strftime('%d/%m/%Y %H:%M') }} · Usuarios registrados: {{ total_usuarios }}</p>
+
+{% macro horario(ambito, h) %}
+<form method="post" action="{{ url_for('configuracion_acceso') }}" class="row g-2 align-items-end">
+  <input type="hidden" name="ambito" value="{{ ambito }}">
+  <div class="col-auto form-check ms-2">
+    <input class="form-check-input" type="checkbox" name="activo" id="act{{ ambito }}" {% if h.activo %}checked{% endif %}>
+    <label class="form-check-label" for="act{{ ambito }}">Restringir horario</label>
+  </div>
+  <div class="col-auto"><input type="time" name="inicio" value="{{ h.inicio }}" class="form-control form-control-sm"></div>
+  <div class="col-auto"><input type="time" name="fin" value="{{ h.fin }}" class="form-control form-control-sm"></div>
+  <div class="col-auto">
+    {% for d in dias %}
+    <label class="me-2 small"><input type="checkbox" name="dias" value="{{ loop.index0 }}" {% if loop.index0 in h.dias %}checked{% endif %}> {{ d[:3] }}</label>
+    {% endfor %}
+  </div>
+  <div class="col-auto"><button class="btn btn-sm btn-primary">Guardar</button></div>
+</form>
+{% endmacro %}
+
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="card"><div class="card-body d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-primary" href="{{ url_for('logos_admin') }}"><i class="bi bi-image"></i> Logotipos</a>
+      <a class="btn btn-outline-primary" href="{{ url_for('retencion_historial') }}"><i class="bi bi-clock-history"></i> Retención del historial</a>
+      <a class="btn btn-outline-primary" href="{{ url_for('empresas') }}"><i class="bi bi-building"></i> Empresas</a>
+      <a class="btn btn-outline-primary" href="{{ url_for('usuarios') }}"><i class="bi bi-people"></i> Usuarios</a>
+    </div></div>
+  </div>
+</div>
+
+<div class="card mb-3"><div class="card-header"><b>Abrir / cerrar acceso por empresa, sucursal y usuario</b></div><div class="card-body">
+  <p class="small text-muted">Úsalo al terminar la jornada. Cerrar desconecta de inmediato a quienes estén dentro; tú nunca eres bloqueado. Los usuarios desactivados no pueden iniciar sesión hasta que los actives.</p>
+  {% macro boton(url, cerrada) %}
+  <form method="post" action="{{ url }}" class="d-inline">
+    <button class="btn btn-sm {{ 'btn-danger' if cerrada else 'btn-success' }}">
+      <i class="bi {{ 'bi-lock-fill' if cerrada else 'bi-unlock-fill' }}"></i> {{ 'Cerrado · Abrir' if cerrada else 'Abierto · Cerrar' }}
+    </button>
+  </form>
+  {% endmacro %}
+  {% for n in arbol %}
+  <div class="border rounded p-2 mb-2">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <b><i class="bi bi-building"></i> {{ n.empresa.nombre }}</b>
+      {{ boton(url_for('acceso_alcance', tipo='empresa', objeto_id=n.empresa.id), n.cerrada) }}
+    </div>
+    {% for u in n.unidades %}
+    <div class="ms-3 mt-2">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span><i class="bi bi-shop-window"></i> {{ u.unidad.nombre }}</span>
+        {{ boton(url_for('acceso_alcance', tipo='unidad', objeto_id=u.unidad.id), u.cerrada) }}
+      </div>
+      {% for us in u.usuarios %}
+      <div class="ms-3 d-flex flex-wrap justify-content-between align-items-center gap-2 small mt-1">
+        <span><i class="bi bi-person"></i> {{ us.usuario }} · {{ us.rol }}</span>
+        <form method="post" action="{{ url_for('acceso_alcance', tipo='usuario', objeto_id=us.id) }}" class="d-inline">
+          <button class="btn btn-sm {{ 'btn-outline-success' if us.activo else 'btn-outline-danger' }}">{{ 'Activo · Desactivar' if us.activo else 'Inactivo · Activar' }}</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<p class="text-muted">Aún no hay empresas.</p>{% endfor %}
+</div></div>
+
+<div class="card mb-3"><div class="card-header"><b>Acceso y horarios</b></div><div class="card-body">
+  <form method="post" action="{{ url_for('configuracion_acceso') }}" class="row g-2 align-items-end mb-4">
+    <input type="hidden" name="ambito" value="pausa">
+    <div class="col-auto form-check form-switch ms-2">
+      <input class="form-check-input" type="checkbox" name="pausado" id="pausado" {% if pausado %}checked{% endif %}>
+      <label class="form-check-label" for="pausado"><b>Pausar acceso</b> (solo tú podrás entrar)</label>
+    </div>
+    <div class="col"><input name="mensaje" value="{{ mensaje_pausa }}" maxlength="200" class="form-control form-control-sm" placeholder="Mensaje para los usuarios"></div>
+    <div class="col-auto"><button class="btn btn-sm btn-warning">Aplicar</button></div>
+  </form>
+  <h6>Horario general (todas las empresas)</h6>
+  {{ horario('global', global_h) }}
+  <hr>
+  <h6>Horario por empresa (reemplaza al general si está activo)</h6>
+  {% for e, h in empresas %}
+  <div class="mb-3">
+    <b>{{ e.nombre }}</b>
+    <a class="small ms-2" href="{{ url_for('administrar_empresa', id=e.id) }}">Administrar</a>
+    <a class="small ms-2" href="{{ url_for('configurar_modulos_empresa', id=e.id) }}">Módulos</a>
+    {{ horario(e.id, h) }}
+  </div>
+  {% else %}<p class="text-muted">Aún no hay empresas.</p>{% endfor %}
+  <p class="small text-muted mb-0">El administrador principal nunca es bloqueado. Los usuarios con sesión abierta son desconectados al salir del horario.</p>
+</div></div>
+
+<div class="card mb-3"><div class="card-header d-flex justify-content-between">
+  <b>Respaldos y restauración</b>
+  <div class="d-flex gap-2">
+    <form method="post" action="{{ url_for('respaldo_crear') }}"><button class="btn btn-sm btn-success">Crear respaldo ahora</button></form>
+    <form method="post" action="{{ url_for('reparar_sistema') }}"><button class="btn btn-sm btn-outline-secondary" title="Agrega tablas o columnas faltantes tras una actualización, sin tocar tus datos">Verificar y reparar estructura</button></form>
+  </div>
+</div><div class="card-body">
+  <p class="small text-muted">Se crea un respaldo automático al iniciar y cada día. Restaurar siempre guarda antes un respaldo del estado actual (“pre_restauracion”). Descarga copias periódicas y guárdalas fuera de esta computadora.</p>
+  <table class="table table-sm align-middle">
+    <thead><tr><th>Archivo</th><th>Fecha</th><th>Tipo</th><th>MB</th><th></th></tr></thead>
+    <tbody>
+    {% for r in respaldos %}
+      <tr>
+        <td>{{ r.nombre }}</td><td>{{ r.fecha.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ r.motivo }}</td><td>{{ '%.2f'|format(r.mb) }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('respaldo_descargar', nombre=r.nombre) }}">Descargar</a>
+          <form class="d-inline" method="post" action="{{ url_for('respaldo_restaurar') }}" onsubmit="return confirmarRestaurar(this)">
+            <input type="hidden" name="nombre" value="{{ r.nombre }}"><input type="hidden" name="confirmacion">
+            <button class="btn btn-sm btn-outline-warning">Restaurar</button>
+          </form>
+          <form class="d-inline" method="post" action="{{ url_for('respaldo_eliminar', nombre=r.nombre) }}" onsubmit="return confirm('¿Eliminar este respaldo?')">
+            <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}<tr><td colspan="5" class="text-muted">Sin respaldos.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <form method="post" action="{{ url_for('respaldo_restaurar') }}" enctype="multipart/form-data" class="row g-2 align-items-end" onsubmit="return confirmarRestaurar(this)">
+    <input type="hidden" name="confirmacion">
+    <div class="col-auto"><label class="form-label small">Restaurar desde un archivo (.zip o .db)</label>
+      <input type="file" name="archivo" accept=".zip,.db" class="form-control form-control-sm" required></div>
+    <div class="col-auto"><button class="btn btn-sm btn-warning">Restaurar archivo</button></div>
+  </form>
+</div></div>
+
+<div class="card mb-4"><div class="card-header"><b>Acceso desde celulares e internet</b></div><div class="card-body small">
+  <p><b>En la misma red Wi‑Fi:</b>
+  {% for ip in ips %}<code>http://{{ ip }}:{{ puerto }}</code> {% else %}<span class="text-muted">no se detectó IP de red</span>{% endfor %}</p>
+  <p><b>Desde internet (recomendado):</b> un túnel seguro (Cloudflare Tunnel) o un hosting con HTTPS. No abras puertos del router. Inicia con <code>SMUNE_HTTPS=1</code> y <code>SMUNE_PROXY=1</code>.
+  Para cortar el acceso externo cierra el túnel, o usa “Pausar acceso” y los horarios de arriba.</p>
+  <p class="mb-0">Protecciones activas: contraseñas con cambio inicial, bloqueo por 5 intentos fallidos, permisos en cada ruta, cookies seguras y servidor de producción.</p>
+</div></div>
+<script>
+function confirmarRestaurar(f) {
+  var t = prompt('Esto reemplazará la información actual por la del respaldo.\nEscribe RESTAURAR para confirmar:');
+  if (t !== 'RESTAURAR') return false;
+  f.querySelector('[name=confirmacion]').value = t;
+  return true;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nuevo Usuario
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container">
+
+<div class="card shadow">
+
+<div class="card-header">
+
+<h3>
+
+Nuevo Usuario
+
+</h3>
+
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-6">
+
+<label>Nombre</label>
+
+<input
+type="text"
+name="nombre"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-6">
+
+<label>Usuario</label>
+
+<input
+type="text"
+name="usuario"
+class="form-control"
+required>
+
+</div>
+
+</div>
+
+<br>
+
+<div class="row">
+
+<div class="col-md-6">
+
+<label>Contraseña</label>
+
+<input
+type="password"
+name="password"
+class="form-control"
+required>
+
+</div>
+
+<div class="col-md-6">
+
+<label>Rol</label>
+
+<select
+name="rol"
+class="form-control">
+
+<div class="mb-3">
+
+<label>
+
+Nivel Jerárquico
+
+</label>
+
+<select
+name="nivel"
+class="form-select">
+
+<option value="ADMIN">
+Administrador Principal
+</option>
+
+<option value="GERENTE">
+Gerente
+</option>
+
+<option value="SUPERVISOR">
+Supervisor
+</option>
+
+<option value="CAJERO">
+Cajero
+</option>
+
+<option value="VENDEDOR">
+Vendedor
+</option>
+
+</select>
+
+</div>
+
+<option>GERENTE</option>
+
+<option>SUPERVISOR</option>
+
+<option>CAJERO</option>
+
+<option>VENDEDOR</option>
+
+<option>COMPRAS</option>
+
+<option>INVENTARIO</option>
+
+<option>CONTABILIDAD</option>
+
+</select>
+
+</div>
+
+</div>
+
+<br>
+
+{% if current_user.rol=="ADMIN" %}
+
+<label>Empresa</label>
+
+<select
+name="empresa_id"
+class="form-control">
+
+{% for e in empresas %}
+
+<option value="{{ e.id }}">
+
+{{ e.nombre }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+<br>
+
+{% endif %}
+
+<label>Unidad de negocio</label>
+
+<select
+name="unidad_id"
+class="form-select">
+
+{% for u in unidades %}
+
+<option value="{{ u.id }}">
+
+{{ u.nombre }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+<br>
+
+<button
+class="btn btn-success">
+
+Guardar Usuario
+
+</button>
+
+<a
+href="{{ url_for('usuarios') }}"
+class="btn btn-secondary">
+
+Cancelar
+
+</a>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

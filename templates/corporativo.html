@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}
+SMUNE | Panel Corporativo
+{% endblock %}
+
+{% block contenido %}
+
+<div class="mb-4">
+
+    <h2 class="fw-bold">
+
+        🏢 SMUNE
+
+    </h2>
+
+    <h5 class="text-secondary">
+
+        Sistema Multi Unidad de Negocio Empresarial
+
+    </h5>
+
+    <hr>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+<div class="col-md-3">
+
+<div class="card shadow border-primary">
+
+<div class="card-body text-center">
+
+<h6>Unidades</h6>
+
+<h2>{{ total_unidades }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow border-success">
+
+<div class="card-body text-center">
+
+<h6>Ventas</h6>
+
+<h2>${{ "{:,.0f}".format(ventas_totales) }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow border-warning">
+
+<div class="card-body text-center">
+
+<h6>Productos</h6>
+
+<h2>{{ productos_totales }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow border-info">
+
+<div class="card-body text-center">
+
+<h6>Clientes</h6>
+
+<h2>{{ clientes_totales }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<hr>
+
+<h4 class="mb-4">
+
+Unidades de Negocio
+
+</h4>
+
+<div class="row">
+
+{% for item in resumen %}
+
+<div class="col-lg-4 mb-4">
+
+<div class="card shadow h-100">
+
+<div class="card-header">
+
+<h5>
+
+🏢 {{ item.unidad.nombre }}
+
+</h5>
+
+</div>
+
+<div class="card-body">
+
+<p>
+
+<strong>Ventas</strong>
+
+<br>
+
+${{ "{:,.0f}".format(item.ventas) }}
+
+</p>
+
+<p>
+
+<strong>Productos</strong>
+
+<br>
+
+{{ item.productos }}
+
+</p>
+
+<p>
+
+<strong>Clientes</strong>
+
+<br>
+
+{{ item.clientes }}
+
+</p>
+
+<p>
+
+<strong>Apartados</strong>
+
+<br>
+
+{{ item.apartados }}
+
+</p>
+
+</div>
+
+<div class="card-footer">
+
+<div class="d-grid gap-2">
+
+<a
+
+class="btn btn-primary"
+
+href="{{ url_for('dashboard_unidad', id=item.unidad.id) }}">
+
+<i class="bi bi-box-arrow-in-right"></i>
+
+Entrar
+
+</a>
+
+<a
+
+class="btn btn-outline-secondary"
+
+href="{{ url_for('usuarios_unidad', id=item.unidad.id) }}">
+
+<i class="bi bi-people"></i>
+
+Usuarios
+
+</a>
+
+<a
+
+class="btn btn-outline-success"
+
+href="{{ url_for('modulos_unidad', id=item.unidad.id) }}">
+
+<i class="bi bi-grid"></i>
+
+Módulos
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

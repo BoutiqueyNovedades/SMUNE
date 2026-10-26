@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Cliente - NuevaModa{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Editar Cliente</h2>
+    <a href="{{ url_for('clientes') }}" class="btn btn-secondary">
+        ← Volver a Clientes
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre completo *</label>
+                <input class="form-control" 
+                       type="text"
+                       id="nombre"
+                       name="nombre"
+                       value="{{ cliente.nombre }}"
+                       required
+                       maxlength="150">
+            </div>
+
+            <div class="mb-3">
+                <label for="telefono" class="form-label">Teléfono</label>
+                <input class="form-control" 
+                       type="tel"
+                       id="telefono"
+                       name="telefono"
+                       value="{{ cliente.telefono or '' }}"
+                       maxlength="30"
+                       placeholder="Ej: 55 1234 5678">
+            </div>
+
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo electrónico</label>
+                <input class="form-control" 
+                       type="email"
+                       id="correo"
+                       name="correo"
+                       value="{{ cliente.correo or '' }}"
+                       maxlength="120"
+                       placeholder="ejemplo@correo.com">
+                <div class="form-text">Opcional. Se usará para enviar promociones.</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Puntos de fidelización</label>
+                <input class="form-control" 
+                       type="number"
+                       value="{{ cliente.puntos }}"
+                       disabled
+                       readonly>
+                <div class="form-text">Los puntos solo se modifican con ventas.</div>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-lg"></i> Actualizar Cliente
+            </button>
+            <a href="{{ url_for('clientes') }}" class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}
+Administrar Empresa
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container mt-4">
+
+<h2>
+
+{{ empresa.nombre }}
+
+</h2>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-3">
+
+{% if puede_editar %}
+<a href="{{ url_for('editar_empresa', id=empresa.id) }}"
+class="btn btn-warning w-100 mb-3">
+
+Editar Empresa
+
+</a>
+{% endif %}
+
+</div>
+
+<div class="col-md-3">
+
+<a href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}"
+class="btn btn-primary w-100 mb-3">
+
+Ver sucursales
+
+</a>
+
+</div>
+
+<div class="col-md-3">
+
+{% if empresa.activa %}
+
+<a href="{{ url_for('nueva_unidad', empresa_id=empresa.id) }}"
+class="btn btn-success w-100 mb-3">
+
+<i class="bi bi-plus-circle"></i>
+
+Nueva Unidad
+
+</a>
+
+{% else %}
+
+<button type="button" class="btn btn-secondary w-100 mb-3" disabled>
+
+<i class="bi bi-lock"></i>
+
+Empresa suspendida
+
+</button>
+
+{% endif %}
+
+</div>
+
+<div class="col-md-3">
+
+{% if current_user.administrador_principal %}
+<a href="{{ url_for('nuevo_gerente_empresa', id=empresa.id) }}"
+class="btn btn-success w-100 mb-3">
+
+Crear gerente corporativo
+
+</a>
+
+</div>
+{% endif %}
+
+<div class="col-md-3">
+
+<a class="btn btn-secondary w-100 mb-3" href="{{ url_for('configurar_modulos_empresa', id=empresa.id) }}">
+
+Módulos de empresa
+
+</a>
+
+</div>
+
+<div class="col-md-3">
+<a class="btn btn-outline-primary w-100 mb-3" href="{{ url_for('roles_empresa', id=empresa.id) }}">
+	<i class="bi bi-shield-lock"></i> Roles y permisos
+</a>
+</div>
+
+<div class="card shadow-sm mt-4">
+	<div class="card-header"><strong>Gerentes corporativos de consulta</strong></div>
+	<div class="card-body">
+		{% if gerentes %}
+		<div class="table-responsive">
+			<table class="table table-sm align-middle mb-0">
+				<thead><tr><th>Nombre</th><th>Usuario</th><th>Estado</th></tr></thead>
+				<tbody>
+					{% for gerente in gerentes %}
+					<tr><td>{{ gerente.nombre }}</td><td>{{ gerente.usuario }}</td><td>{% if gerente.activo %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-danger">Inactivo</span>{% endif %}</td></tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% else %}
+		<p class="text-muted mb-0">No hay gerentes corporativos asignados.</p>
+		{% endif %}
+	</div>
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

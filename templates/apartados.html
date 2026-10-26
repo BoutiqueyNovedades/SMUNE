@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Apartados - NuevaModa{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Apartados</h2>
+    <a href="{{ url_for('nuevo_apartado') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Nuevo Apartado
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table id="tablaApartados" class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Folio</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th class="text-end">Total</th>
+                <th class="text-end">Anticipo</th>
+                <th class="text-end">Saldo</th>
+                <th>Vencimiento</th>
+                <th class="text-center">Días</th>
+                <th class="text-center">Estado</th>
+                <th style="width: 100px;">Acciones</th>
+            </tr>
+            <tr>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Folio"></th>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Fecha"></th>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Cliente"></th>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Total"></th>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Anticipo"></th>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Saldo"></th>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Vence"></th>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Días"></th>
+                <th><input type="text" class="form-control form-control-sm" placeholder="Estado"></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in apartados %}
+            <tr>
+                <td><strong>{{ a.numero_apartado }}</strong></td>
+                <td>{{ a.fecha.strftime('%d/%m/%Y') }}</td>
+                <td>{{ a.cliente.nombre if a.cliente else '-' }}</td>
+                <td class="text-end">${{ "%.2f"|format(a.total) }}</td>
+                <td class="text-end text-success">${{ "%.2f"|format(a.enganche) }}</td>
+                <td class="text-end text-danger">${{ "%.2f"|format(a.saldo) }}</td>
+                <td>{{ a.fecha_limite.strftime('%d/%m/%Y') if a.fecha_limite else '-' }}</td>
+                <td class="text-center">
+                    {% if a.estado == 'ACTIVO' and a.fecha_limite %}
+                        {% set dias = (a.fecha_limite - today).days %}
+                        {% if dias >= 0 %}<span class="badge bg-success">{{ dias }} días</span>
+                        {% else %}<span class="badge bg-danger">{{ dias|abs }} días vencido</span>{% endif %}
+                    {% elif a.estado == 'LIQUIDADO' %}<span class="badge bg-success">Pagado</span>
+                    {% elif a.estado == 'ENTREGADO' %}<span class="badge bg-primary">Entregado</span>
+                    {% elif a.estado == 'CANCELADO' %}<span class="badge bg-secondary">Cancelado</span>
+                    {% else %}<span class="text-muted">-</span>{% endif %}
+                </td>
+                <td class="text-center">
+                    {% if a.estado == 'ACTIVO' %}
+                        {% if a.fecha_limite and a.fecha_limite < today %}
+                            <span class="badge bg-danger">VENCIDO</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">ACTIVO</span>
+                        {% endif %}
+                    {% elif a.estado == 'LIQUIDADO' %}<span class="badge bg-success">LIQUIDADO</span>
+                    {% elif a.estado == 'CANCELADO' %}<span class="badge bg-secondary">CANCELADO</span>
+                    {% elif a.estado == 'ENTREGADO' %}<span class="badge bg-primary">ENTREGADO</span>
+                    {% else %}<span class="badge bg-danger">{{ a.estado }}</span>{% endif %}
+                </td>
+                <td><a href="{{ url_for('detalle_apartado', id=a.id) }}" class="btn btn-info btn-sm">Ver</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot class="table-secondary">
+            <tr>
+                <th colspan="3">Totales:</th>
+                <th class="text-end" id="totalApartados">$0.00</th>
+                <th class="text-end" id="totalAnticipo">$0.00</th>
+                <th class="text-end" id="totalSaldo">$0.00</th>
+                <th colspan="4"></th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    var table = $('#tablaApartados').DataTable({
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+        orderCellsTop: true,
+        order: [[1, 'desc']],
+        pageLength: 25,
+        
+footerCallback: function(row, data, start, end, display) {
+            var api = this.api();
+            var clean = function(i) { return typeof i === 'string'? parseFloat(i.replace(/[$,]/g, '')) : typeof i === 'number'? i : 0; };
+
+            // Solo sumar filas que NO estén canceladas. Columna 8 es Estado
+            var total = api.rows({ page: 'current' }).data().reduce(function (a, b) {
+                if (b[8].includes('ACTIVO') || b[8].includes('LIQUIDADO') || b[8].includes('ENTREGADO') || b[8].includes('VENCIDO')) {
+                    return clean(a) + clean(b[3]);
+                }
+                return clean(a);
+            }, 0);
+
+            var anticipo = api.rows({ page: 'current' }).data().reduce(function (a, b) {
+                if (b[8].includes('ACTIVO') || b[8].includes('LIQUIDADO') || b[8].includes('ENTREGADO') || b[8].includes('VENCIDO')) {
+                    return clean(a) + clean(b[4]);
+                }
+                return clean(a);
+            }, 0);
+
+            var saldo = api.rows({ page: 'current' }).data().reduce(function (a, b) {
+                if (b[8].includes('ACTIVO') || b[8].includes('LIQUIDADO') || b[8].includes('ENTREGADO') || b[8].includes('VENCIDO')) {
+                    return clean(a) + clean(b[5]);
+                }
+                return clean(a);
+            }, 0);
+
+            $('#totalApartados').html('$' + total.toFixed(2));
+            $('#totalAnticipo').html('$' + anticipo.toFixed(2));
+            $('#totalSaldo').html('$' + saldo.toFixed(2));
+        }
+    });
+    
+    $('#tablaApartados thead tr:eq(1) th').each(function(i) {
+        $('input', this).on('keyup change', function() {
+            if (table.column(i).search() !== this.value) {
+                table.column(i).search(this.value).draw();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

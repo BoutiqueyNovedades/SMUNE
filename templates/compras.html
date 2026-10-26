@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}
+Compras
+{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between mb-3">
+
+    <h2>Compras</h2>
+
+    <a href="{{ url_for('nueva_compra') }}"
+       class="btn btn-success">
+
+        + Nueva Compra
+
+    </a>
+
+</div>
+
+<table
+class="table table-bordered table-striped"
+id="tabla">
+
+<thead>
+
+<tr>
+
+<th>Folio</th>
+<th>Fecha</th>
+<th>Proveedor</th>
+<th>Total</th>
+<th>Usuario</th>
+<th>Acciones</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for compra in compras %}
+
+<tr>
+
+<td>
+
+{{ compra.numero_compra }}
+
+</td>
+
+<td>
+
+{{ compra.fecha.strftime("%d/%m/%Y") }}
+
+</td>
+
+<td>
+
+{{ compra.proveedor.nombre if compra.proveedor else "" }}
+
+</td>
+
+<td>
+
+${{ "%.2f"|format(compra.total) }}
+
+</td>
+
+<td>
+
+{{ compra.usuario.nombre if compra.usuario else "" }}
+
+</td>
+
+<td>
+
+<a
+href="{{ url_for('detalle_compra', id=compra.id) }}"
+class="btn btn-primary btn-sm">
+
+Ver
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+$(document).ready(function(){
+
+$('#tabla').DataTable({
+
+language:{
+url:'//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+}
+
+});
+
+});
+
+</script>
+
+{% endblock %}

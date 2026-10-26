@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}
+Empresas
+{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+
+            <i class="bi bi-buildings"></i>
+
+            Empresas
+
+        </h2>
+
+        <small class="text-muted">
+
+            Administración Corporativa
+
+        </small>
+
+    </div>
+
+    <div>
+
+        <a href="{{ url_for('nueva_empresa') }}"
+   class="btn btn-success">
+
+            <i class="bi bi-plus-circle"></i>
+
+            Nueva Empresa
+
+        </a>
+
+    </div>
+
+</div>
+
+<hr>
+
+<div class="row mb-4">
+
+<div class="col-md-3">
+
+<div class="card border-primary shadow-sm">
+
+<div class="card-body text-center">
+
+<h6>
+
+Empresas
+
+</h6>
+
+<h2>
+
+{{ empresas|length }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-success shadow-sm">
+
+<div class="card-body text-center">
+
+<h6>
+
+Unidades
+
+</h6>
+
+<h2>
+
+{{ total_unidades }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-warning shadow-sm">
+
+<div class="card-body text-center">
+
+<h6>
+
+Usuarios
+
+</h6>
+
+<h2>
+
+{{ total_usuarios }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-info shadow-sm">
+
+<div class="card-body text-center">
+
+<h6>
+
+Productos
+
+</h6>
+
+<h2>
+
+{{ total_productos }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row">
+
+{% for empresa in empresas %}
+
+<div class="col-lg-4 mb-4">
+
+<div class="card shadow border-0 h-100">
+
+<div class="card-header bg-primary text-white">
+
+<h5 class="mb-0">
+
+<i class="bi bi-building"></i>
+
+{{ empresa.nombre }}
+
+</h5>
+
+</div>
+
+<div class="card-body">
+
+<p>
+
+<strong>Razón Social</strong>
+
+<br>
+
+{{ empresa.razon_social or "-" }}
+
+</p>
+
+<p>
+<strong>Giro</strong><br>
+{{ empresa.giro or "-" }}
+</p>
+
+<p>
+
+<strong>RFC</strong>
+
+<br>
+
+{{ empresa.rfc or "-" }}
+
+</p>
+
+<p>
+
+<strong>Correo</strong>
+
+<br>
+
+{{ empresa.correo or "-" }}
+
+</p>
+
+<p>
+
+<strong>Teléfono</strong>
+
+<br>
+
+{{ empresa.telefono or "-" }}
+
+</p>
+
+<p>
+
+<strong>Estado</strong>
+
+<br>
+
+{% if empresa.activa %}
+
+<span class="badge bg-success">
+
+Activa
+
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+
+Suspendida
+
+</span>
+
+{% endif %}
+
+</p>
+
+</div>
+
+<div class="card-footer">
+
+<div class="d-grid gap-2">
+
+<a
+    href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}"
+    class="btn btn-primary">
+
+    <i class="bi bi-eye"></i>
+
+    Ver empresa
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

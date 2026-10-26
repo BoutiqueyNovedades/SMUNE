@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>Menú</h3>
+    {% include "_giro_selector.html" %}
+    <form method="post" action="{{ url_for('rest_menu_nuevo') }}" class="row g-2 mb-4">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-4"><input class="form-control" name="nombre" placeholder="Nombre" required></div>
+        <div class="col-md-2"><select class="form-select" name="categoria"><option>PLATILLO</option><option>BEBIDA</option><option>EXTRA</option></select></div>
+        <div class="col-md-2"><input class="form-control" name="precio" type="number" step="0.01" min="0" placeholder="Precio" required></div>
+        <div class="col-md-2"><button class="btn btn-primary">Agregar</button></div>
+    </form>
+    <table class="table table-sm table-striped">
+        <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        {% for p in platillos %}
+        <tr><td>{{ p.nombre }}</td><td>{{ p.categoria }}</td>
+            <td><form id="f{{ p.id }}" method="post" action="{{ url_for('rest_menu_editar', id=p.id) }}"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"></form>
+                <input form="f{{ p.id }}" class="form-control form-control-sm w-auto" name="precio" type="number" step="0.01" min="0" value="{{ p.precio }}"></td>
+            <td>{{ 'Activo' if p.activo else 'Inactivo' }}</td>
+            <td><button form="f{{ p.id }}" class="btn btn-sm btn-outline-primary">Guardar</button>
+                <button form="f{{ p.id }}" class="btn btn-sm btn-outline-secondary" name="alternar" value="1">{{ 'Desactivar' if p.activo else 'Activar' }}</button></td>
+            </tr>
+        {% else %}<tr><td colspan="5" class="text-muted">Sin elementos.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

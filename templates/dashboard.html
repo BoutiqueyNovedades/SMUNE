@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex flex-column align-items-center justify-content-center" style="min-height:60vh">
+  {% if logo_url %}
+  <img src="{{ logo_url }}" alt="Logotipo" style="max-width:360px;max-height:260px;object-fit:contain">
+  {% elif current_user.administrador_principal %}
+  <h1 class="text-muted">SMUNE</h1>
+  <a href="{{ url_for('logos_admin') }}" class="btn btn-outline-secondary btn-sm mt-2">Administrar logotipos</a>
+  {% endif %}
+</div>
+{% endblock %}

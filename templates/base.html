@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <meta name="theme-color" content="#212529">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <title>SMUNE - Sistema ERP</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        body {
+            background: #f8fafc;
+        }
+
+        /* =========================================
+           BARRA SUPERIOR
+           ========================================= */
+
+        .navbar {
+            min-height: 56px;
+        }
+
+        /* =========================================
+           MENU LATERAL
+           ========================================= */
+
+        .sidebar {
+
+            min-height: calc(100vh - 56px);
+
+            background: #1e293b;
+
+        }
+
+        .sidebar .nav-link {
+
+            color: #cbd5e1;
+
+            padding: 10px 15px;
+
+            margin-bottom: 2px;
+
+            transition: 0.2s;
+
+        }
+
+        .sidebar .nav-link:hover {
+
+            background: #334155;
+
+            color: white;
+
+        }
+
+        .sidebar .nav-link.active {
+
+            background: #0d6efd;
+
+            color: white;
+
+        }
+
+        /* =========================================
+           TITULOS DEL MENU
+           ========================================= */
+
+        .menu-titulo {
+
+            color: #94a3b8;
+
+            font-size: 11px;
+
+            font-weight: bold;
+
+            padding: 15px 15px 5px;
+
+            text-transform: uppercase;
+
+        }
+
+        /* =========================================
+           MENU ADMINISTRADOR UNIVERSAL
+           ========================================= */
+
+        .admin-universal {
+
+            background: #172554;
+
+            border-left: 3px solid #0d6efd;
+
+        }
+
+        .admin-universal:hover {
+
+            background: #1e40af !important;
+
+        }
+
+        /* =========================================
+           CONTENIDO PRINCIPAL
+           ========================================= */
+
+        .contenido-principal {
+
+            min-height: calc(100vh - 56px);
+
+            padding-top: 10px;
+
+        }
+
+        /* =========================================
+           TARJETAS
+           ========================================= */
+
+        .card {
+
+            border-radius: 10px;
+
+        }
+
+        /* =========================================
+           CELULAR
+           ========================================= */
+
+        #btn-menu { display: none; }
+        #menu-fondo { display: none; }
+
+        @media (max-width: 767.98px) {
+            #btn-menu { display: inline-block; }
+            .navbar-brand { margin-right: 0; }
+            .navbar .container-fluid { flex-wrap: nowrap; gap: 8px; }
+            .navbar .nombre-usuario { display: none; }
+            .navbar .btn .texto-btn { display: none; }
+
+            .sidebar {
+                position: fixed;
+                top: 0; left: 0; bottom: 0;
+                width: 82%; max-width: 300px;
+                z-index: 1045;
+                overflow-y: auto;
+                transform: translateX(-100%);
+                transition: transform .25s ease;
+                padding-top: 56px !important;
+            }
+            body.menu-abierto .sidebar { transform: none; box-shadow: 4px 0 20px rgba(0,0,0,.4); }
+            body.menu-abierto #menu-fondo {
+                display: block; position: fixed; inset: 0;
+                background: rgba(0,0,0,.45); z-index: 1040;
+            }
+            .sidebar .nav-link { padding: 14px 18px; font-size: 1.05rem; }
+
+            main.contenido-principal { padding-left: 12px !important; padding-right: 12px !important; }
+            #contexto-usuario { gap: 4px 14px !important; font-size: .8rem; }
+            h3, .h3 { font-size: 1.3rem; }
+
+            .form-control, .form-select, .btn { font-size: 16px; min-height: 44px; }
+            .btn-sm { min-height: 38px; }
+            .modal-dialog { margin: 8px; }
+            .card-body { padding: 12px; }
+            .table { font-size: .85rem; }
+            .dataTables_wrapper .row > div { width: 100%; text-align: left !important; }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     BARRA SUPERIOR
+     ========================================================= -->
+
+<nav class="navbar navbar-dark bg-dark">
+
+    <div class="container-fluid">
+
+        {% if current_user.is_authenticated %}
+        <button type="button" id="btn-menu" class="btn btn-outline-light btn-sm" aria-label="Menú">
+            <i class="bi bi-list"></i>
+        </button>
+        {% endif %}
+
+        <!-- LOGO -->
+
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="navbar-brand"
+        >
+
+            <i class="bi bi-shop"></i>
+
+            SMUNE
+
+        </a>
+
+
+        <!-- USUARIO -->
+
+        {% if current_user.is_authenticated %}
+
+        <div class="d-flex align-items-center text-white">
+
+            {% if current_user.administrador_principal %}
+
+                <span class="me-3 nombre-usuario">
+
+                    <i class="bi bi-shield-fill-check"></i>
+
+                    Administrador Principal
+
+                </span>
+
+            {% else %}
+
+                <span class="me-3 nombre-usuario">
+
+                    {{ current_user.nombre }}
+
+                    |
+
+                    {{ current_user.rol }}
+
+                </span>
+
+            {% endif %}
+
+
+            <!-- SALIR -->
+
+            {% if current_user.administrador_principal %}
+            <form method="post" action="{{ url_for('acceso_alternar') }}" class="me-2 m-0"
+                  onsubmit="return confirm('{{ 'Abrir el acceso a los usuarios?' if acceso_pausado else 'Cerrar el acceso? Se desconectará a todos y se hará un respaldo.' }}')">
+                <button class="btn btn-sm {{ 'btn-danger' if acceso_pausado else 'btn-success' }}">
+                    <i class="bi {{ 'bi-lock-fill' if acceso_pausado else 'bi-unlock-fill' }}"></i>
+                    <span class="texto-btn">Acceso: {{ 'CERRADO' if acceso_pausado else 'ABIERTO' }}</span>
+                </button>
+            </form>
+            {% endif %}
+
+            <a
+                href="{{ url_for('mi_perfil') }}"
+                class="btn btn-outline-light btn-sm me-2"
+            >
+                <i class="bi bi-person-circle"></i>
+                <span class="texto-btn">Mi perfil</span>
+            </a>
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="btn btn-outline-light btn-sm"
+            >
+
+                <i class="bi bi-box-arrow-right"></i>
+
+                <span class="texto-btn">Salir</span>
+
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</nav>
+
+{% if current_user.is_authenticated %}
+{% set _u = current_user.unidad %}
+{% set _e = current_user.empresa or (_u.empresa if _u else None) %}
+<div class="bg-light border-bottom px-3 py-2 small d-flex flex-wrap gap-4" id="contexto-usuario">
+    <span><i class="bi bi-person-badge"></i> <strong>{{ current_user.nombre }}</strong> · {{ 'Administrador Principal' if current_user.administrador_principal else current_user.rol }}</span>
+    <span><i class="bi bi-building"></i> Empresa:
+        <strong>{% if current_user.administrador_principal %}Todas las empresas{% elif _e %}{{ _e.nombre }}{% else %}-{% endif %}</strong></span>
+    <span><i class="bi bi-shop-window"></i> Sucursal:
+        <strong>{% if _u %}{{ _u.nombre }}{% elif current_user.administrador_principal or _e %}Todas las sucursales{% else %}-{% endif %}</strong></span>
+</div>
+{% endif %}
+
+
+
+<!-- =========================================================
+     CONTENEDOR PRINCIPAL
+     ========================================================= -->
+
+<div class="container-fluid">
+
+    <div class="row">
+
+
+        {% if current_user.is_authenticated %}
+
+
+        <!-- =================================================
+             MENU LATERAL
+             ================================================= -->
+
+        <nav class="col-md-2 d-md-block sidebar p-0">
+
+            <div class="pt-3">
+
+                <ul class="nav flex-column">
+
+
+                    <!-- =====================================
+                         GENERAL
+                         ===================================== -->
+
+                    <li class="menu-titulo">
+
+                        General
+
+                    </li>
+
+
+                    <!-- DASHBOARD -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ url_for('dashboard') }}"
+                        >
+
+                            <i class="bi bi-speedometer2"></i>
+
+                            Dashboard
+
+                        </a>
+
+                    </li>
+
+
+
+                    {% set modulos_usuario = current_user.permisos|selectattr('puede_ver')|map(attribute='modulo')|list %}
+                    {% set puede_operar = current_user.unidad_negocio_id and not current_user.administrador_principal %}
+                    {% if puede_operar %}
+                    <!-- =====================================
+                        OPERACIÓN
+                        ===================================== -->
+
+                    <li class="menu-titulo">
+
+                        Operación
+
+                    </li>
+
+
+                    {% if current_user.administrador_principal or ('PRODUCTOS' in modulos_usuario and 'PRODUCTOS' in modulos_empresa_activos) %}
+                    <!-- PRODUCTOS -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ url_for('productos') }}"
+                        >
+
+                            <i class="bi bi-box"></i>
+
+                            Productos
+
+                        </a>
+
+                    </li>
+
+
+                    {% endif %}
+                    {% if current_user.administrador_principal or ('VENTAS' in modulos_usuario and 'VENTAS' in modulos_empresa_activos) %}
+                    <!-- VENTAS -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ url_for('ventas') }}"
+                        >
+
+                            <i class="bi bi-cart"></i>
+
+                            Ventas
+
+                        </a>
+
+                    </li>
+
+
+                    {% endif %}
+                    {% if current_user.administrador_principal or ('CLIENTES' in modulos_usuario and 'CLIENTES' in modulos_empresa_activos) %}
+                    <!-- CLIENTES -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ url_for('clientes') }}"
+                        >
+
+                            <i class="bi bi-people"></i>
+
+                            Clientes
+
+                        </a>
+
+                    </li>
+
+
+                    {% endif %}
+                    {% if 'APARTADOS' in modulos_usuario and 'APARTADOS' in modulos_empresa_activos %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('apartados') }}"><i class="bi bi-bookmark-check"></i> Apartados</a>
+                    </li>
+                    {% endif %}
+                    {% if current_user.administrador_principal or ('PROVEEDORES' in modulos_usuario and 'PROVEEDORES' in modulos_empresa_activos) %}
+                    <!-- PROVEEDORES -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ url_for('proveedores') }}"
+                        >
+
+                            <i class="bi bi-truck"></i>
+
+                            Proveedores
+
+                        </a>
+
+                    </li>
+
+
+                    {% endif %}
+                    {% if current_user.administrador_principal or ('CAJA' in modulos_usuario and 'CAJA' in modulos_empresa_activos) %}
+                    <!-- CAJA -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ url_for('caja') }}"
+                        >
+
+                            <i class="bi bi-cash-stack"></i>
+
+                            Caja
+
+                        </a>
+
+                    </li>
+
+                    {% endif %}
+
+                    
+
+                    {% if current_user.administrador_principal or ('ANALISIS_DATOS' in modulos_usuario and 'ANALISIS_DATOS' in modulos_empresa_activos) or ('REPORTES' in modulos_usuario and 'REPORTES' in modulos_empresa_activos) %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('analisis_datos') }}">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            Análisis de datos
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if current_user.administrador_principal or ('REPORTES' in modulos_usuario and 'REPORTES' in modulos_empresa_activos) %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('reportes') }}"><i class="bi bi-file-earmark-bar-graph"></i> Reportes</a>
+                    </li>
+                    {% endif %}
+                    {% if current_user.administrador_principal or ('COMPRAS' in modulos_usuario and 'COMPRAS' in modulos_empresa_activos) %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('compras') }}"><i class="bi bi-bag"></i> Compras</a>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+
+                    {% set enlaces_giro = [
+                        ('MENU', 'rest_menu', 'bi-journal-richtext', 'Menú'),
+                        ('PEDIDOS', 'rest_pedidos', 'bi-receipt', 'Mesas y pedidos'),
+                        ('COCINA', 'rest_cocina', 'bi-fire', 'Cocina'),
+                        ('RECETAS_RESTAURANTE', 'rest_insumos', 'bi-basket', 'Insumos'),
+                        ('RECETAS_RESTAURANTE', 'rest_recetas', 'bi-list-check', 'Recetas'),
+                        ('COMPRAS', 'rest_compras', 'bi-box-arrow-in-down', 'Recepción de insumos', 'RESTAURANTE'),
+                        ('MERMA_RESTAURANTE', 'rest_mermas', 'bi-trash', 'Mermas'),
+                        ('REPORTES', 'rest_reportes', 'bi-graph-up', 'Utilidad restaurante', 'RESTAURANTE'),
+                        ('MATERIAS_PRIMAS', 'fab_insumos', 'bi-layers', 'Materias primas'),
+                        ('RECETAS_FABRICACION', 'fab_recetas', 'bi-diagram-3', 'Listas de materiales'),
+                        ('ORDENES_PRODUCCION', 'fab_ordenes', 'bi-gear-wide-connected', 'Órdenes de producción'),
+                        ('COMPRAS', 'fab_compras', 'bi-box-arrow-in-down', 'Recepción de materiales', 'FABRICACION'),
+                        ('COSTOS_FABRICACION', 'fab_costos', 'bi-calculator', 'Costos de fabricación'),
+                        ('COSTOS_FABRICACION', 'fab_mermas', 'bi-trash', 'Desperdicio de materiales'),
+                    ] %}
+                    {% for e in enlaces_giro %}
+                    {% set area_mods = {'RESTAURANTE': ['MENU','RECETAS_RESTAURANTE','PEDIDOS','COCINA','MERMA_RESTAURANTE'], 'FABRICACION': ['MATERIAS_PRIMAS','RECETAS_FABRICACION','ORDENES_PRODUCCION','PROCESOS_FABRICACION','COSTOS_FABRICACION']} %}
+                    {% set area = e[4] if e|length > 4 else ('RESTAURANTE' if e[1].startswith('rest') else 'FABRICACION') %}
+                    {% set area_activa = area_mods[area]|select('in', modulos_empresa_activos)|list|length > 0 %}
+                    {% set modulo_ok = e[0] in modulos_empresa_activos %}
+                    {% if area_activa and modulo_ok and (not current_user.administrador_principal and e[0] in modulos_usuario) %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for(e[1]) }}">
+                            <i class="bi {{ e[2] }}"></i> {{ e[3] }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if current_user.empresa_id and not current_user.unidad_negocio_id and not current_user.administrador_principal %}
+                    <li class="menu-titulo">Empresa</li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('panel_corporativo_empresa', id=current_user.empresa_id) }}"><i class="bi bi-building"></i> Mi empresa</a></li>
+                    {% if 'REPORTES' in modulos_usuario and 'REPORTES' in modulos_empresa_activos %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('reportes', empresa_id=current_user.empresa_id) }}"><i class="bi bi-file-earmark-bar-graph"></i> Reportes consolidados</a></li>
+                    {% endif %}
+                    {% if ('ANALISIS_DATOS' in modulos_usuario and 'ANALISIS_DATOS' in modulos_empresa_activos) or ('REPORTES' in modulos_usuario and 'REPORTES' in modulos_empresa_activos) %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('analisis_datos', empresa_id=current_user.empresa_id) }}"><i class="bi bi-graph-up-arrow"></i> Análisis de datos</a></li>
+                    {% endif %}
+                    {% endif %}
+
+
+
+                    <!-- =====================================
+                         ADMINISTRACIÓN
+                         ===================================== -->
+
+                    {% if current_user.rol in ['ADMIN', 'GERENTE_EMPRESA'] or current_user.administrador_principal %}
+
+                    <li class="menu-titulo">
+
+                        Administración
+
+                    </li>
+
+
+                    <!-- =====================================
+                         ADMINISTRADOR PRINCIPAL / UNIVERSAL
+                         ===================================== -->
+
+                    {% if current_user.administrador_principal %}
+
+
+                    <!-- EMPRESAS -->
+
+                    <li class="nav-item">
+                        <a class="nav-link admin-universal" href="{{ url_for('logos_admin') }}">
+                            <i class="bi bi-image"></i> Logotipos
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link admin-universal" href="{{ url_for('retencion_historial') }}">
+                            <i class="bi bi-clock-history"></i> Historial de caja
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link admin-universal"
+                            href="{{ url_for('empresas') }}"
+                        >
+
+                            <i class="bi bi-buildings"></i>
+
+                            Empresas
+
+                        </a>
+
+                    </li>
+
+
+                    <!-- USUARIOS -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link admin-universal"
+                            href="{{ url_for('usuarios') }}"
+                        >
+
+                            <i class="bi bi-person-gear"></i>
+
+                            Usuarios
+
+                        </a>
+
+                    </li>
+
+
+                    <!-- SEGURIDAD -->
+
+                    {% elif current_user.empresa_id and not current_user.unidad_negocio_id %}
+
+                    {% if 'SEGURIDAD' in modulos_usuario %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('usuarios') }}"><i class="bi bi-people"></i> Usuarios de empresa</a></li>
+                    {% endif %}
+                    {% if 'CONFIGURACION' in modulos_usuario %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('administrar_empresa', id=current_user.empresa_id) }}"><i class="bi bi-gear"></i> Administración de empresa</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('configurar_modulos_empresa', id=current_user.empresa_id) }}"><i class="bi bi-grid"></i> Módulos de empresa</a></li>
+                    {% endif %}
+
+                    {% elif current_user.rol == 'ADMIN' %}
+
+
+                    <!-- =====================================
+                         ADMINISTRADOR NORMAL
+                         ===================================== -->
+
+                    {% if current_user.unidad_negocio_id %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('panel_unidad_corporativa', id=current_user.unidad_negocio_id) }}">
+                            <i class="bi bi-shop"></i>
+                            Mi sucursal
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- SEGURIDAD -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ url_for('usuarios') }}"
+                        >
+
+                            <i class="bi bi-shield-lock"></i>
+
+                            Seguridad
+
+                        </a>
+
+                    </li>
+
+
+                    {% endif %}
+
+
+                    <!-- =====================================
+                         CONFIGURACIÓN
+                         ===================================== -->
+
+                    <li class="nav-item">
+
+                        <a
+                            class="nav-link"
+                            href="{{ url_for('configuracion') }}"
+                        >
+
+                            <i class="bi bi-gear"></i>
+
+                            Configuración
+
+                        </a>
+
+                    </li>
+
+
+                    {% endif %}
+
+
+                </ul>
+
+            </div>
+
+        </nav>
+
+
+        {% endif %}
+
+
+
+        <!-- =================================================
+             CONTENIDO PRINCIPAL
+             ================================================= -->
+
+        <main
+            class="
+                {% if current_user.is_authenticated %}
+                    col-md-10
+                {% else %}
+                    col-md-12
+                {% endif %}
+
+                ms-sm-auto
+
+                px-4
+
+                contenido-principal
+            "
+        >
+
+
+            <!-- =============================================
+                 MENSAJES FLASH
+                 ============================================= -->
+
+            {% with messages = get_flashed_messages(
+                with_categories=true
+            ) %}
+
+                {% if messages %}
+
+                    {% for category, message in messages %}
+
+                    <div
+                        class="
+                            alert
+                            alert-{{ category }}
+                            alert-dismissible
+                            fade
+                            show
+                            mt-3
+                        "
+                        role="alert"
+                    >
+
+                        {{ message }}
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                        ></button>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            {% endwith %}
+
+
+
+            <!-- =============================================
+                 BLOQUE DE CONTENIDO DE CADA PAGINA
+                 ============================================= -->
+
+            {% block contenido %}
+            {% block content %}{% endblock %}
+            {% endblock %}
+
+
+        </main>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     BOOTSTRAP JAVASCRIPT
+     ========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+></script>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<div id="menu-fondo"></div>
+<script>
+(function () {
+    var b = document.body;
+    var btn = document.getElementById('btn-menu');
+    if (btn) btn.addEventListener('click', function () { b.classList.toggle('menu-abierto'); });
+    document.getElementById('menu-fondo').addEventListener('click', function () { b.classList.remove('menu-abierto'); });
+    document.querySelectorAll('.sidebar a').forEach(function (a) {
+        a.addEventListener('click', function () { b.classList.remove('menu-abierto'); });
+    });
+    // Tablas con desplazamiento horizontal en pantallas pequeñas
+    document.querySelectorAll('main table').forEach(function (t) {
+        if (t.closest('.table-responsive') || t.closest('.dataTables_wrapper')) return;
+        var w = document.createElement('div');
+        w.className = 'table-responsive';
+        t.parentNode.insertBefore(w, t);
+        w.appendChild(t);
+    });
+})();
+</script>
+
+{% block scripts %}{% endblock %}
+
+
+</body>
+
+</html>

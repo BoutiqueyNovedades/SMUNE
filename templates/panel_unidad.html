@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ unidad.nombre }}
+{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h2>
+
+        <i class="bi bi-building"></i>
+
+        {{ unidad.nombre }}
+
+    </h2>
+
+    <a href="{{ url_for('unidades_negocio') }}"
+       class="btn btn-secondary">
+
+        <i class="bi bi-arrow-left"></i>
+
+        Regresar
+
+    </a>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<div class="card shadow border-primary">
+
+<div class="card-body text-center">
+
+<h6>Usuarios</h6>
+
+<h2>{{ total_usuarios }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow border-success">
+
+<div class="card-body text-center">
+
+<h6>Productos</h6>
+
+<h2>{{ total_productos }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow border-warning">
+
+<div class="card-body text-center">
+
+<h6>Clientes</h6>
+
+<h2>{{ total_clientes }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card shadow border-info">
+
+<div class="card-body text-center">
+
+<h6>Ventas</h6>
+
+<h2>{{ total_ventas }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row mt-4">
+
+<div class="col-md-6">
+
+<div class="card shadow">
+
+<div class="card-header">
+
+Accesos rápidos
+
+</div>
+
+<div class="card-body d-grid gap-2">
+
+<a class="btn btn-primary"
+href="{{ url_for('modulos_unidad', id=unidad.id) }}">
+
+Administrar módulos
+
+</a>
+
+<a class="btn btn-secondary"
+href="{{ url_for('usuarios_unidad', id=unidad.id) }}">
+
+Administrar usuarios
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-6">
+
+<div class="card shadow">
+
+<div class="card-header">
+
+Información
+
+</div>
+
+<div class="card-body">
+
+<p><strong>Responsable:</strong> {{ unidad.responsable or "-" }}</p>
+
+<p><strong>Teléfono:</strong> {{ unidad.telefono or "-" }}</p>
+
+<p><strong>Correo:</strong> {{ unidad.correo or "-" }}</p>
+
+<p><strong>Dirección:</strong> {{ unidad.direccion or "-" }}</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

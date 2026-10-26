@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container-fluid py-4">
+
+<!-- ENCABEZADO -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2 class="fw-bold">
+            <i class="bi bi-people"></i>
+            Usuarios de la unidad
+        </h2>
+
+        <p class="text-muted mb-1">
+            Empresa:
+            <strong>{{ empresa.nombre }}</strong>
+        </p>
+
+        <p class="text-muted mb-0">
+            Unidad:
+            <strong>{{ unidad.nombre }}</strong>
+        </p>
+    </div>
+
+    <div>
+
+        <a
+            href="{{ url_for('nuevo_usuario_unidad', id=unidad.id) }}"
+            class="btn btn-success"
+        >
+            <i class="bi bi-person-plus"></i>
+            Nuevo usuario
+        </a>
+
+        <a
+            href="{{ url_for('administrar_unidad', id=unidad.id) }}"
+            class="btn btn-secondary"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Volver
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- TABLA DE USUARIOS -->
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-dark text-white">
+
+        <h5 class="mb-0">
+            <i class="bi bi-person-lines-fill"></i>
+            Usuarios registrados
+        </h5>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Primer acceso</th>
+                        <th class="text-center">
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for usuario in usuarios %}
+
+                    <tr>
+
+                        <td>
+                            {{ usuario.id }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ usuario.nombre }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ usuario.usuario }}
+                        </td>
+
+                        <td>
+
+                            {% if usuario.rol == "ADMIN" %}
+
+                                <span class="badge bg-primary">
+                                    Gerente
+                                </span>
+
+                            {% elif usuario.rol == "SUPERVISOR" %}
+
+                                <span class="badge bg-info text-dark">Supervisor</span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+                                    EMPLEADO
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if usuario.activo %}
+
+                                <span class="badge bg-success">
+                                    Activo
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-danger">
+                                    Inactivo
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if usuario.primer_acceso %}
+
+                                <span class="badge bg-warning text-dark">
+                                    Pendiente
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-success">
+                                    Completado
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td class="text-center">
+
+                            <div class="btn-group" role="group">
+
+                                {% if not usuario.administrador_principal and (current_user.administrador_principal or usuario.rol != 'ADMIN') %}
+                                    <!-- EDITAR -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'editar_usuario',
+                                        id=usuario.id
+                                    ) }}"
+                                    class="btn btn-warning btn-sm"
+                                >
+                                    <i class="bi bi-pencil"></i>
+                                    Editar
+                                </a>
+
+
+                                <!-- PERMISOS -->
+
+                                <a
+                                    href="{{ url_for(
+                                        'permisos_usuario',
+                                        id=usuario.id
+                                    ) }}"
+                                    class="btn btn-primary btn-sm"
+                                >
+                                    <i class="bi bi-shield-lock"></i>
+                                    Permisos
+                                </a>
+
+                                <form method="POST" action="{{ url_for('restablecer_password_usuario', id=usuario.id) }}" class="d-inline" onsubmit="return confirm('¿Generar una contraseña temporal nueva para este usuario?');">
+                                    <button type="submit" class="btn btn-outline-info btn-sm">
+                                        <i class="bi bi-key"></i> Restablecer clave
+                                    </button>
+                                </form>
+
+
+                                <!-- ACTIVAR / DESACTIVAR -->
+
+                                {% if not usuario.administrador_principal %}
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for(
+                                        'cambiar_estado_usuario',
+                                        id=usuario.id
+                                    ) }}"
+                                    class="d-inline"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm
+                                        {% if usuario.activo %}
+                                            btn-outline-danger
+                                        {% else %}
+                                            btn-outline-success
+                                        {% endif %}"
+                                    >
+
+                                        {% if usuario.activo %}
+
+                                            <i class="bi bi-person-x"></i>
+                                            Desactivar
+
+                                        {% else %}
+
+                                            <i class="bi bi-person-check"></i>
+                                            Activar
+
+                                        {% endif %}
+
+                                    </button>
+
+                                </form>
+
+
+                                <!-- ELIMINAR -->
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for(
+                                        'eliminar_usuario',
+                                        id=usuario.id
+                                    ) }}"
+                                    class="d-inline"
+                                    onsubmit="return confirm(
+                                        '¿Seguro que deseas eliminar este usuario?'
+                                    );"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-danger btn-sm"
+                                    >
+
+                                        <i class="bi bi-trash"></i>
+                                        Eliminar
+
+                                    </button>
+
+                                </form>
+
+                                {% endif %}
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center text-muted py-4"
+                        >
+
+                            <i class="bi bi-person-x fs-2"></i>
+
+                            <br>
+
+                            No existen usuarios registrados
+                            en esta unidad.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+{% endblock %}

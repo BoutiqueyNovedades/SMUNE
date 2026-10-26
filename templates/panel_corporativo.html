@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2>
+                🏢 Panel Corporativo
+            </h2>
+
+            <p class="text-muted mb-0">
+                Administrador Principal / Universal
+            </p>
+        </div>
+
+        <a class="btn btn-success" href="{{ url_for('nueva_empresa') }}">
+            <i class="bi bi-building-add"></i> Crear empresa
+        </a>
+
+    </div>
+
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <strong>
+                Empresas
+            </strong>
+
+        </div>
+
+
+        <div class="card-body">
+
+            {% if empresas %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Código
+                            </th>
+
+                            <th>
+                                Empresa
+                            </th>
+
+                            <th>
+                                RFC
+                            </th>
+
+                            <th>
+                                Estado
+                            </th>
+
+                            <th class="text-end">
+                                Acción
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for empresa in empresas %}
+
+                        <tr>
+
+                            <td>
+                                {{ empresa.codigo }}
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    {{ empresa.nombre }}
+                                </strong>
+
+                            </td>
+
+                            <td>
+                                {{ empresa.rfc or "—" }}
+                            </td>
+
+                            <td>
+
+                                {% if empresa.activa %}
+
+                                    <span class="badge bg-success">
+                                        Activa
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger">
+                                        Inactiva
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <td class="text-end">
+
+                                <a
+                                    href="{{ url_for(
+                                        'panel_corporativo_empresa',
+                                        id=empresa.id
+                                    ) }}"
+                                    class="btn btn-primary btn-sm"
+                                >
+                                    Ver empresa
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+                <div class="alert alert-info d-flex justify-content-between align-items-center">
+                    <span>No hay empresas todavía. Crea la primera para iniciar el flujo de sucursales y usuarios.</span>
+                    <a class="btn btn-sm btn-success" href="{{ url_for('nueva_empresa') }}">Crear primera empresa</a>
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

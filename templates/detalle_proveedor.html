@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mt-3">
+  <h3><i class="bi bi-truck"></i> {{ proveedor.nombre }}</h3>
+  <a href="{{ url_for('proveedores') }}" class="btn btn-outline-secondary">Volver</a>
+</div>
+<div class="row mt-3 g-3">
+  <div class="col-md-4"><div class="card"><div class="card-body"><small>Total comprado</small><h5>${{ '%.2f'|format(total_compras) }}</h5></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><small>Documentos</small><h5>{{ total_documentos }}</h5></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><small>Última compra</small><h6>{{ ultima_compra.strftime('%d/%m/%Y') if ultima_compra else '-' }}</h6></div></div></div>
+</div>
+<table class="table table-sm mt-3">
+  <thead><tr><th>Folio</th><th>Fecha</th><th class="text-end">Total</th></tr></thead>
+  <tbody>
+  {% for c in compras %}
+  <tr><td><a href="{{ url_for('detalle_compra', id=c.id) }}">{{ c.numero_compra }}</a></td><td>{{ c.fecha.strftime('%d/%m/%Y') if c.fecha else '' }}</td><td class="text-end">${{ '%.2f'|format(c.total or 0) }}</td></tr>
+  {% else %}<tr><td colspan="3" class="text-muted text-center">Sin compras</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuevo Apartado - NuevaModa{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Nuevo Apartado</h2>
+    <a href="{{ url_for('apartados') }}" class="btn btn-secondary">Regresar</a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-body">
+                <label class="form-label">Buscar producto por código o nombre</label>
+                <input type="text" id="buscador" class="form-control form-control-lg" placeholder="Escanea código o escribe el nombre..." autocomplete="off" autofocus>
+                <div id="resultados" class="list-group mt-2" style="display:none; position:absolute; z-index:1000; width:95%;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Detalle de Apartado</h5>
+                <button type="button" class="btn btn-danger btn-sm" onclick="cancelarApartado()">
+                    <i class="bi bi-x-circle"></i> Cancelar Apartado
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm" id="tabla-carrito">
+                        <thead>
+                            <tr>
+                              <th>Imagen</th>
+                              <th>Código</th>
+                              <th>Producto</th>
+                              <th class="text-center">Stock</th>
+                              <th style="width:100px;">Cant.</th>
+                              <th class="text-end">Precio</th>
+                              <th class="text-end">Subtotal</th>
+                              <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="carrito-body">
+                            <tr id="carrito-vacio">
+                                <td colspan="8" class="text-center text-muted">Agrega productos con el buscador</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" id="form-apartado">
+                    <input type="hidden" name="carrito" id="carrito-input">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Cliente *</label>
+                        <select name="cliente_id" class="form-select" required>
+                            <option value="">Selecciona un cliente</option>
+                            {% for c in clientes %}
+                            <option value="{{ c.id }}">{{ c.nombre }} - {{ c.telefono or 'Sin teléfono' }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Los apartados requieren cliente registrado.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de vencimiento *</label>
+                        <input type="date" name="fecha_vencimiento" class="form-control" required 
+                               min="{{ hoy }}" value="{{ fecha_default }}">
+                        <div class="form-text">Fecha límite para liquidar el apartado.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descuentos aplicables</label>
+                        
+                        {% if config.mayoreo_activo %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="mayoreo" value="si" id="mayoreo" onchange="calcularTotales()">
+                            <label class="form-check-label" for="mayoreo">Aplicar Mayoreo</label>
+                            <br><small class="text-muted">
+                                3-5 pzas: {{ config.descuento_3_5 }}% | 
+                                6-10: {{ config.descuento_6_10 }}% | 
+                                11+: {{ config.descuento_11_mas }}%
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        {% if config.descuento_adicional_activo %}
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="desc_adicional" value="si" id="desc_adicional" onchange="calcularTotales()">
+                            <label class="form-check-label" for="desc_adicional">
+                                Descuento Adicional {{ config.descuento_adicional_porcentaje }}%
+                            </label>
+                        </div>
+                        {% endif %}
+
+                        {% if config.fidelidad_activa %}
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="desc_fidelidad" value="si" id="desc_fidelidad" onchange="calcularTotales()">
+                            <label class="form-check-label" for="desc_fidelidad">
+                                Descuento Fidelidad {{ config.porcentaje_fidelidad }}%
+                            </label>
+                            <br><small class="text-muted" id="puntos-cliente"></small>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal:</span>
+                        <strong>$<span id="subtotal">0.00</span></strong>
+                    </div>
+                    <div class="d-flex justify-content-between text-danger">
+                        <span>Descuento:</span>
+                        <strong>-$<span id="descuento">0.00</span></strong>
+                    </div>
+                    <div class="d-flex justify-content-between fs-4 mt-2">
+                        <span>Total:</span>
+                        <strong>$<span id="total">0.00</span></strong>
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <label class="form-label">Anticipo inicial *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="anticipo" id="anticipo" class="form-control" 
+                                   step="0.01" min="0" required onchange="validarAnticipo()">
+                        </div>
+                        <div class="d-flex justify-content-between text-success">
+                           <span>Saldo pendiente:</span>
+                           <strong>$<span id="saldo">0.00</span></strong>
+                        </div>
+                        <div class="mb-3 mt-3">
+    <label class="form-label">
+        Observaciones
+    </label>
+
+    <textarea
+        name="observaciones"
+        class="form-control"
+        rows="3"
+        placeholder="Notas del apartado, referencias, comentarios del cliente...">
+    </textarea>
+</div>
+<button type="submit"
+        class="btn btn-warning w-100 mt-3"
+        id="btn-guardar"
+        disabled>
+
+    <i class="bi bi-bag-check"></i>
+    Guardar Apartado
+
+</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const productos = {{ productos|tojson }};
+const clientes = {{ clientes|tojson }};
+const config = {{ config|tojson }};
+
+let carrito = [];
+
+const buscador = document.getElementById('buscador');
+const resultados = document.getElementById('resultados');
+
+buscador.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    if (query.length < 2) {
+        resultados.style.display = 'none';
+        return;
+    }
+    const filtrados = productos.filter(p => 
+        p.codigo.toLowerCase().includes(query) || 
+        p.nombre.toLowerCase().includes(query)
+    ).slice(0, 5);
+
+    if (filtrados.length === 0) {
+        resultados.innerHTML = '<div class="list-group-item text-muted">Sin resultados</div>';
+        resultados.style.display = 'block';
+        return;
+    }
+
+    resultados.innerHTML = filtrados.map(p => {
+    const imagenHtml = p.imagen 
+        ? `<img src="/static/uploads/${p.imagen}" 
+                alt="${p.nombre}" 
+                style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; margin-right: 12px;">`
+        : `<div style="width: 60px; height: 60px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+               <i class="bi bi-image text-muted"></i>
+           </div>`;
+    
+    return `
+    <a href="#" class="list-group-item list-group-item-action" onclick="agregarProducto(${p.id}); return false;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                ${imagenHtml}
+                <div>
+                    <strong>${p.codigo}</strong> - ${p.nombre}<br>
+                    <small class="text-muted">
+                        Stock: ${p.stock} | Talla: ${p.talla || '-'} | Color: ${p.color || '-'}
+                    </small>
+                </div>
+            </div>
+            <div class="text-end">
+                <strong>$${p.precio.toFixed(2)}</strong>
+            </div>
+        </div>
+    </a>`;
+}).join('');
+
+    resultados.style.display = 'block';
+});
+
+buscador.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const query = this.value.toLowerCase().trim();
+        const exacto = productos.find(p => p.codigo.toLowerCase() === query);
+        if (exacto) agregarProducto(exacto.id);
+    }
+});
+
+document.addEventListener('click', function(e) {
+    if (!buscador.contains(e.target)) resultados.style.display = 'none';
+});
+
+function agregarProducto(id) {
+    const producto = productos.find(p => p.id === id);
+    if (!producto) return;
+    
+    const existe = carrito.find(item => item.producto_id === id);
+    if (existe) {
+        if (existe.cantidad < producto.stock) {
+            existe.cantidad++;
+            existe.subtotal = existe.cantidad * existe.precio;
+        } else {
+            alert('No hay más stock disponible');
+        }
+    } else {
+        carrito.push({
+            producto_id: producto.id,
+            codigo: producto.codigo,
+            nombre: producto.nombre,
+            stock: producto.stock,
+            cantidad: 1,
+            precio: producto.precio,
+            subtotal: producto.precio,
+            imagen: producto.imagen
+        });
+    }
+    buscador.value = '';
+    resultados.style.display = 'none';
+    buscador.focus();
+    renderCarrito();
+}
+
+function cambiarCantidad(index, nuevaCantidad) {
+    nuevaCantidad = parseInt(nuevaCantidad);
+    if (nuevaCantidad <= 0) {
+        eliminarDelCarrito(index);
+        return;
+    }
+    if (nuevaCantidad > carrito[index].stock) {
+        alert('Stock insuficiente. Máximo: ' + carrito[index].stock);
+        renderCarrito();
+        return;
+    }
+    carrito[index].cantidad = nuevaCantidad;
+    carrito[index].subtotal = nuevaCantidad * carrito[index].precio;
+    renderCarrito();
+}
+
+function eliminarDelCarrito(index) {
+    carrito.splice(index, 1);
+    renderCarrito();
+}
+
+function cancelarApartado() {
+
+    if (carrito.length === 0) return;
+
+    if (confirm('¿Cancelar el apartado? Se perderán todos los productos agregados.')) {
+
+        carrito = [];
+
+        // Limpiar anticipo
+        document.getElementById("anticipo").value = "";
+
+        // Limpiar carrito oculto
+        document.getElementById("carrito-input").value = "";
+
+        // Renderizar nuevamente
+        renderCarrito();
+
+    }
+}
+
+function renderCarrito() {
+    const tbody = document.getElementById('carrito-body');
+    if (carrito.length === 0) {
+        tbody.innerHTML = `
+            <tr id="carrito-vacio">
+                <td colspan="8" class="text-center text-muted">
+                    Agrega productos con el buscador
+                </td>
+            </tr>
+        `;
+        document.getElementById('btn-guardar').disabled = true;
+    } else {
+        tbody.innerHTML = carrito.map((item, index) => `
+            <tr>
+                <td>
+                    ${item.imagen
+                        ? `<img src="/static/uploads/${item.imagen}"
+                                alt="${item.nombre}"
+                                style="width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #ddd;">`
+                        : `<div style="width:60px; height:60px; background:#f8f9fa; border:1px solid #ddd; border-radius:6px; display:flex; align-items:center; justify-content:center;">
+                                <i class="bi bi-image text-muted"></i>
+                           </div>`
+                    }
+                </td>
+                <td>${item.codigo}</td>
+                <td>${item.nombre}</td>
+                <td class="text-center">
+                    <span class="badge bg-secondary">${item.stock}</span>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" 
+                           value="${item.cantidad}" min="1" max="${item.stock}" 
+                           onchange="cambiarCantidad(${index}, this.value)">
+                </td>
+                <td class="text-end">$${item.precio.toFixed(2)}</td>
+                <td class="text-end">$${item.subtotal.toFixed(2)}</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="eliminarDelCarrito(${index})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        document.getElementById('btn-guardar').disabled = false;
+    }
+    calcularTotales();
+}
+
+function calcularTotales() {
+    const subtotal = carrito.reduce((sum, item) => sum + item.subtotal, 0);
+    let descuentoMayoreo = 0;
+    let descuentoAdicional = 0;
+    let descuentoFidelidad = 0;
+
+    // 1. Mayoreo
+    if (document.getElementById('mayoreo')?.checked && config.mayoreo_activo) {
+        const totalPiezas = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+        if (totalPiezas >= 11) descuentoMayoreo = subtotal * config.descuento_11_mas / 100;
+        else if (totalPiezas >= 6) descuentoMayoreo = subtotal * config.descuento_6_10 / 100;
+        else if (totalPiezas >= 3) descuentoMayoreo = subtotal * config.descuento_3_5 / 100;
+    }
+
+    let baseDespuesMayoreo = subtotal - descuentoMayoreo;
+
+    // 2. Descuento adicional
+    if (document.getElementById('desc_adicional')?.checked && config.descuento_adicional_activo) {
+        descuentoAdicional = baseDespuesMayoreo * config.descuento_adicional_porcentaje / 100;
+    }
+
+    let baseDespuesAdicional = baseDespuesMayoreo - descuentoAdicional;
+
+    // 3. Fidelidad
+    if (document.getElementById('desc_fidelidad')?.checked && config.fidelidad_activa) {
+        descuentoFidelidad = baseDespuesAdicional * config.porcentaje_fidelidad / 100;
+    }
+
+    const descuentoTotal = descuentoMayoreo + descuentoAdicional + descuentoFidelidad;
+    const total = subtotal - descuentoTotal;
+
+    document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+    document.getElementById('descuento').textContent = descuentoTotal.toFixed(2);
+    document.getElementById('total').textContent = total.toFixed(2);
+    
+    // Calcular anticipo mínimo
+    const anticipoMinimo = total * (config.anticipo_minimo_porcentaje / 100);
+    document.getElementById('anticipo-minimo').textContent = '$' + anticipoMinimo.toFixed(2);
+    document.getElementById('anticipo').min = anticipoMinimo.toFixed(2);
+    document.getElementById('anticipo').max = total.toFixed(2);
+
+    validarAnticipo();
+    document.getElementById('carrito-input').value = JSON.stringify(carrito);
+}
+
+function validarAnticipo() {
+
+    const total = parseFloat(
+        document.getElementById('total').textContent
+    );
+
+    const anticipo = parseFloat(
+        document.getElementById('anticipo').value
+    ) || 0;
+
+    const anticipoMinimo =
+        total *
+        (config.anticipo_minimo_porcentaje / 100);
+
+    let saldo = total - anticipo;
+
+    // Evitar saldo negativo
+    if (saldo < 0) {
+        saldo = 0;
+    }
+
+    document.getElementById(
+        'saldo'
+    ).textContent = saldo.toFixed(2);
+
+    if (anticipo < anticipoMinimo) {
+
+        document
+            .getElementById('anticipo')
+            .classList
+            .add('is-invalid');
+
+        document
+            .getElementById('btn-guardar')
+            .disabled = true;
+
+    } else {
+
+        document
+            .getElementById('anticipo')
+            .classList
+            .remove('is-invalid');
+
+        document
+            .getElementById('btn-guardar')
+            .disabled = carrito.length === 0;
+
+    }
+}
+
+// Mostrar puntos del cliente
+document.querySelector('select[name="cliente_id"]').addEventListener('change', function() {
+    const clienteId = this.value;
+    if (!clienteId) {
+        document.getElementById('puntos-cliente').textContent = '';
+        return;
+    }
+    const cliente = clientes.find(c => c.id == clienteId);
+    if (cliente) {
+        document.getElementById('puntos-cliente').textContent = `Cliente tiene ${cliente.puntos} puntos`;
+    }
+});
+
+document.getElementById('form-apartado').addEventListener('submit', function(e) {
+
+    // Actualizar el carrito antes de enviar
+    document.getElementById('carrito-input').value = JSON.stringify(carrito);
+
+    if (carrito.length === 0) {
+        e.preventDefault();
+        alert('Agrega al menos un producto');
+        return;
+    }
+
+    const anticipo = parseFloat(document.getElementById('anticipo').value) || 0;
+    const total = parseFloat(document.getElementById('total').textContent);
+    const anticipoMinimo = total * (config.anticipo_minimo_porcentaje / 100);
+
+    if (anticipo < anticipoMinimo) {
+        e.preventDefault();
+        alert(`El anticipo mínimo es $${anticipoMinimo.toFixed(2)}`);
+        return;
+    }
+});
+</script>
+
+{% endblock %}

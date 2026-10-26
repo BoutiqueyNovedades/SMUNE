@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <h3><i class="bi bi-cash-stack"></i> Caja</h3>
+  <a href="{{ url_for('caja_historial') }}" class="btn btn-outline-secondary btn-sm">Historial de jornadas</a>
+</div>
+
+{% if caja %}
+<div class="card mt-3"><div class="card-body">
+  <span class="badge bg-success">Jornada abierta</span>
+  <p class="mt-2 mb-1">Abierta: {{ caja.fecha_apertura.strftime('%d/%m/%Y %H:%M') }}</p>
+  <h2>Saldo en caja: ${{ '%.2f'|format(saldo or 0) }}</h2>
+  {% if es_gerente %}
+  <p class="text-muted">Saldo inicial: ${{ '%.2f'|format(caja.fondo_inicial or 0) }}</p>
+  <a href="{{ url_for('movimiento_caja') }}" class="btn btn-primary btn-sm">Movimiento</a>
+  <a href="{{ url_for('cerrar_caja') }}" class="btn btn-danger btn-sm">Realizar corte</a>
+  {% endif %}
+  <a href="{{ url_for('nueva_venta') }}" class="btn btn-success btn-sm">Nueva venta</a>
+</div></div>
+
+{% include "_jornada_ventas.html" %}
+
+{% if es_gerente %}
+<h5 class="mt-4">Movimientos</h5>
+<table class="table table-sm">
+  <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Usuario</th><th>Observaciones</th></tr></thead>
+  <tbody>
+  {% for m in movimientos %}
+    <tr><td>{{ m.fecha.strftime('%d/%m %H:%M') if m.fecha }}</td><td>{{ m.tipo }}</td>
+        <td>${{ '%.2f'|format(m.monto or 0) }}</td><td>{{ m.usuario.nombre if m.usuario }}</td><td>{{ m.observaciones }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% else %}
+<div class="card mt-3"><div class="card-body">
+  <span class="badge bg-secondary">Caja cerrada</span>
+  {% if es_gerente %}
+  <p class="mt-2">No hay jornada abierta.</p>
+  <a href="{{ url_for('abrir_caja') }}" class="btn btn-success">Abrir caja</a>
+  {% else %}
+  <p class="mt-2">Esperando la apertura de caja por el gerente.</p>
+  {% endif %}
+  {% if ultima %}
+  <hr>
+  <h5>Última jornada cerrada</h5>
+  <h3>Dinero que debe tener en caja: ${{ '%.2f'|format(ultima.saldo_actual or 0) }}</h3>
+  {% if es_gerente %}
+  <p>Contado: ${{ '%.2f'|format(ultima.efectivo_final or 0) }} · Diferencia: ${{ '%.2f'|format(ultima.diferencia or 0) }}</p>
+  {% endif %}
+  <a href="{{ url_for('detalle_caja', id=ultima.id) }}">Ver detalle de la jornada en el historial</a>
+  {% endif %}
+</div></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mt-3">
+  <h3><i class="bi bi-person"></i> {{ cliente.nombre }}</h3>
+  <div>
+    <a href="{{ url_for('historial_puntos', id=cliente.id) }}" class="btn btn-outline-primary">Historial de puntos</a>
+    <a href="{{ url_for('clientes') }}" class="btn btn-outline-secondary">Volver</a>
+  </div>
+</div>
+<div class="row mt-3 g-3">
+  <div class="col-md-3"><div class="card"><div class="card-body"><small>Puntos</small><h5>{{ cliente.puntos or 0 }}</h5></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><small>Compras</small><h5>${{ '%.2f'|format(total_compras) }}</h5></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><small>Apartados</small><h5>${{ '%.2f'|format(total_apartados) }}</h5></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><small>Saldo de crédito</small><h5>${{ '%.2f'|format(saldo_creditos) }}</h5></div></div></div>
+</div>
+<p class="mt-3 text-muted">Tel: {{ cliente.telefono or '-' }} · Correo: {{ cliente.correo or '-' }} · {{ cliente.direccion or '' }}</p>
+<h5 class="mt-3">Ventas</h5>
+<table class="table table-sm">
+  <thead><tr><th>Folio</th><th>Fecha</th><th>Estado</th><th class="text-end">Total</th></tr></thead>
+  <tbody>
+  {% for v in ventas %}
+  <tr><td><a href="{{ url_for('detalle_venta', id=v.id) }}">{{ v.numero_venta }}</a></td><td>{{ v.fecha.strftime('%d/%m/%Y') if v.fecha else '' }}</td><td>{{ v.estado }}</td><td class="text-end">${{ '%.2f'|format(v.total or 0) }}</td></tr>
+  {% else %}<tr><td colspan="4" class="text-muted text-center">Sin ventas</td></tr>{% endfor %}
+  </tbody>
+</table>
+<h5>Apartados</h5>
+<table class="table table-sm">
+  <thead><tr><th>Folio</th><th>Fecha</th><th>Estado</th><th class="text-end">Total</th><th class="text-end">Saldo</th></tr></thead>
+  <tbody>
+  {% for a in apartados %}
+  <tr><td>{{ a.numero_apartado }}</td><td>{{ a.fecha.strftime('%d/%m/%Y') if a.fecha else '' }}</td><td>{{ a.estado }}</td><td class="text-end">${{ '%.2f'|format(a.total or 0) }}</td><td class="text-end">${{ '%.2f'|format(a.saldo or 0) }}</td></tr>
+  {% else %}<tr><td colspan="5" class="text-muted text-center">Sin apartados</td></tr>{% endfor %}
+  </tbody>
+</table>
+<h5>Créditos y pagos</h5>
+<table class="table table-sm">
+  <thead><tr><th>Fecha</th><th>Concepto</th><th class="text-end">Monto</th><th class="text-end">Saldo</th></tr></thead>
+  <tbody>
+  {% for c in creditos %}
+  <tr><td>{{ c.fecha.strftime('%d/%m/%Y') if c.fecha else '' }}</td><td>Crédito {{ c.tipo or '' }}</td><td class="text-end">${{ '%.2f'|format(c.monto or 0) }}</td><td class="text-end">${{ '%.2f'|format(c.saldo or 0) }}</td></tr>
+  {% endfor %}
+  {% for p in pagos_credito %}
+  <tr><td>{{ p.fecha.strftime('%d/%m/%Y') if p.fecha else '' }}</td><td>Pago</td><td class="text-end">${{ '%.2f'|format(p.monto or 0) }}</td><td></td></tr>
+  {% endfor %}
+  {% if not creditos and not pagos_credito %}<tr><td colspan="4" class="text-muted text-center">Sin movimientos de crédito</td></tr>{% endif %}
+  </tbody>
+</table>
+{% endblock %}

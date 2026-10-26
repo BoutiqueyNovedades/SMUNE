@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>Costos de fabricación {% if consolidado %}<small class="text-muted">(consolidado)</small>{% endif %}</h3>
+    {% include "_giro_selector.html" %}
+    <form method="get" class="row g-2 mb-3">
+        <input type="hidden" name="unidad_id" value="{{ 'todas' if consolidado else unidad.id }}">
+        <div class="col-auto"><input class="form-control" type="date" name="desde" value="{{ desde }}"></div>
+        <div class="col-auto"><input class="form-control" type="date" name="hasta" value="{{ hasta }}"></div>
+        <div class="col-auto"><button class="btn btn-primary">Filtrar</button></div>
+        {% if unidades_sel %}<div class="col-auto"><a class="btn btn-outline-secondary" href="?unidad_id=todas&desde={{ desde }}&hasta={{ hasta }}">Todas las unidades</a></div>{% endif %}
+    </form>
+    <div class="row text-center mb-3">
+        <div class="col"><div class="card p-2">Materiales<br><strong>${{ '%.2f'|format(materiales) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Mano de obra<br><strong>${{ '%.2f'|format(mano_obra) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Desperdicio<br><strong>${{ '%.2f'|format(desperdicio) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Mermas de material<br><strong>${{ '%.2f'|format(mermas) }}</strong></div></div>
+        <div class="col"><div class="card p-2">Margen potencial<br><strong>${{ '%.2f'|format(margen) }}</strong></div></div>
+    </div>
+    <table class="table table-sm table-striped">
+        <thead><tr><th>Orden</th><th>Producto</th><th>Producido</th><th>Costo unit.</th><th>Precio</th><th>Margen</th></tr></thead>
+        <tbody>
+        {% for f in filas %}<tr><td>{{ f.o.folio }}</td><td>{{ f.o.producto.nombre }}</td><td>{{ f.o.cantidad_producida }}</td>
+            <td>${{ '%.2f'|format(f.o.costo_unitario) }}</td><td>${{ '%.2f'|format(f.o.producto.precio or 0) }}</td><td>${{ '%.2f'|format(f.margen) }}</td></tr>
+        {% else %}<tr><td colspan="6" class="text-muted">Sin órdenes terminadas en el periodo.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

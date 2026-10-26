@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container-fluid py-4">
+
+    <!-- ENCABEZADO -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-diagram-3"></i>
+                Administrar unidad
+            </h2>
+            <p class="text-muted mb-0">
+                Administración de la unidad de negocio
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            {% if puede_configurar_unidad %}
+                <a
+                    href="{{ url_for('editar_unidad', id=unidad.id) }}"
+                    class="btn btn-warning"
+                >
+                    <i class="bi bi-pencil"></i>
+                    Editar unidad
+                </a>
+
+                <form
+                    method="POST"
+                    action="{{ url_for('cambiar_estado_unidad', id=unidad.id) }}"
+                >
+                    <button
+                        type="submit"
+                        class="btn {% if unidad.activa %}btn-danger{% else %}btn-success{% endif %}"
+                    >
+                        {% if unidad.activa %}
+                            <i class="bi bi-pause-circle"></i>
+                            Desactivar
+                        {% else %}
+                            <i class="bi bi-play-circle"></i>
+                            Activar
+                        {% endif %}
+                    </button>
+                </form>
+
+                {% if current_user.administrador_principal %}
+                <form
+                    method="POST"
+                    action="{{ url_for('eliminar_unidad', id=unidad.id) }}"
+                    onsubmit="return confirm('¿Eliminar esta unidad? Solo se permite si no tiene usuarios ni información asociada.');"
+                >
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-trash"></i>
+                        Eliminar unidad
+                    </button>
+                </form>
+                {% endif %}
+            {% endif %}
+
+            <a
+                href="{{ url_for('unidades') }}"
+                class="btn btn-secondary"
+            >
+                <i class="bi bi-arrow-left"></i>
+                Regresar
+            </a>
+        </div>
+    </div>
+
+
+    <!-- INFORMACIÓN DE LA UNIDAD -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+                <i class="bi bi-building"></i>
+                Información de la unidad
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <!-- ID -->
+
+                <div class="col-md-3">
+
+                    <label class="form-label fw-bold">
+                        ID
+                    </label>
+
+                    <div class="form-control bg-light">
+                        {{ unidad.id }}
+                    </div>
+
+                </div>
+
+
+                <!-- NOMBRE -->
+
+                <div class="col-md-5">
+
+                    <label class="form-label fw-bold">
+                        Nombre
+                    </label>
+
+                    <div class="form-control bg-light">
+                        {{ unidad.nombre }}
+                    </div>
+
+                </div>
+
+
+                <!-- TELÉFONO -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label fw-bold">
+                        Teléfono
+                    </label>
+
+                    <div class="form-control bg-light">
+                        {{ unidad.telefono or "-" }}
+                    </div>
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label fw-bold">
+                        Estado
+                    </label>
+
+                    <div>
+
+                        {% if unidad.activa %}
+
+                            <span class="badge bg-success fs-6">
+                                <i class="bi bi-check-circle"></i>
+                                Activa
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger fs-6">
+                                <i class="bi bi-x-circle"></i>
+                                Inactiva
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- OPCIONES DE ADMINISTRACIÓN -->
+
+    <div class="row g-4">
+
+
+        <!-- USUARIOS -->
+
+        {% if puede_gestionar_usuarios %}
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex align-items-center mb-3">
+
+                        <i class="bi bi-people fs-1 text-primary me-3"></i>
+
+                        <div>
+
+                            <h5 class="mb-1">
+                                Usuarios
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Administrar usuarios de esta unidad
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <a
+                        href="{{ url_for(
+                            'usuarios_unidad',
+                            id=unidad.id
+                        ) }}"
+                        class="btn btn-primary"
+                    >
+
+                        <i class="bi bi-people"></i>
+                        Administrar usuarios
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+        {% endif %}
+
+
+        <!-- INFORMACIÓN -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex align-items-center mb-3">
+
+                        <i class="bi bi-info-circle fs-1 text-success me-3"></i>
+
+                        <div>
+
+                            <h5 class="mb-1">
+                                Información
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Información general de la unidad
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="btn btn-success"
+                        disabled
+                    >
+
+                        <i class="bi bi-eye"></i>
+                        Próximamente
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONFIGURACIÓN -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex align-items-center mb-3">
+
+                        <i class="bi bi-gear fs-1 text-warning me-3"></i>
+
+                        <div>
+
+                            <h5 class="mb-1">
+                                Configuración
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Configuración de la unidad
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="btn btn-warning"
+                        disabled
+                    >
+
+                        <i class="bi bi-gear"></i>
+                        Próximamente
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+{% endblock %}

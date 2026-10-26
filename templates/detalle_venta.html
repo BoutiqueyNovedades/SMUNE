@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle Venta {{ venta.numero_venta }} - NuevaModa{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Venta {{ venta.numero_venta }}</h2>
+    <a href="{{ url_for('ventas') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Ventas
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Información de la Venta</h5>
+                <p class="mb-1"><strong>Fecha:</strong> {{ venta.fecha.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p class="mb-1"><strong>Estado:</strong> 
+                    {% if venta.estado == 'ACTIVA' %}
+                        <span class="badge bg-success">{{ venta.estado }}</span>
+                    {% elif venta.estado == 'CANCELADA' %}
+                        <span class="badge bg-danger">{{ venta.estado }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ venta.estado }}</span>
+                    {% endif %}
+                </p>
+                <p class="mb-1"><strong>Método de Pago:</strong> {{ venta.metodo_pago }}</p>
+                <p class="mb-0"><strong>Cliente:</strong> 
+                    {% if venta.cliente %}
+                        {{ venta.cliente.nombre }}
+                    {% else %}
+                        <span class="text-muted">Cliente General</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Totales</h5>
+                <div class="d-flex justify-content-between">
+                    <span>Subtotal:</span>
+                    <strong>${{ "%.2f"|format(venta.total + venta.descuento) }}</strong>
+                </div>
+                {% if venta.descuento > 0 %}
+                <div class="d-flex justify-content-between text-danger">
+                    <span>Descuento:</span>
+                    <strong>-${{ "%.2f"|format(venta.descuento) }}</strong>
+                </div>
+                {% endif %}
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <h5>Total:</h5>
+                    <h5>${{ "%.2f"|format(venta.total) }}</h5>
+                </div>
+                {% if venta.puntos_otorgados > 0 %}
+                <div class="d-flex justify-content-between text-success">
+                    <span>Puntos Otorgados:</span>
+                    <strong>+{{ venta.puntos_otorgados }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Productos</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Producto</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-end">Precio Unitario</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in venta.detalles %}
+                    <tr>
+                        <td>
+                            {% if d.producto.imagen %}
+                            <img src="{{ url_for('static', filename='uploads/' + d.producto.imagen) }}" 
+                                 width="50" height="50" style="object-fit:cover;">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='uploads/default.jpg') }}" 
+                                 width="50" height="50" style="object-fit:cover;">
+                            {% endif %}
+                        </td>
+                        <td>{{ d.producto.nombre }} <small class="text-muted">({{ d.producto.codigo }})</small></td>
+                        <td class="text-center">{{ d.cantidad }}</td>
+                        <td class="text-end">${{ "%.2f"|format(d.precio_unitario) }}</td>
+                        <td class="text-end">${{ "%.2f"|format(d.subtotal) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                        <td class="text-end"><strong>${{ "%.2f"|format(venta.total + venta.descuento) }}</strong></td>
+                    </tr>
+                    {% if venta.descuento > 0 %}
+                    <tr class="text-danger">
+                        <td colspan="4" class="text-end"><strong>Descuento:</strong></td>
+                        <td class="text-end"><strong>-${{ "%.2f"|format(venta.descuento) }}</strong></td>
+                    </tr>
+                    {% endif %}
+                    <tr class="table-secondary">
+                        <td colspan="4" class="text-end"><h5>Total:</h5></td>
+                        <td class="text-end"><h5>${{ "%.2f"|format(venta.total) }}</h5></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

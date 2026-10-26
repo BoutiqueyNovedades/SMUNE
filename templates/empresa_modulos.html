@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Módulos · {{ empresa.nombre }}{% endblock %}
+{% block contenido %}
+<div class="container-fluid py-4">
+    <nav aria-label="Ruta"><ol class="breadcrumb">
+        {% if current_user.administrador_principal %}<li class="breadcrumb-item"><a href="{{ url_for('panel_corporativo') }}">Empresas</a></li>{% endif %}
+        <li class="breadcrumb-item"><a href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}">{{ empresa.nombre }}</a></li>
+        <li class="breadcrumb-item active">Módulos</li>
+    </ol></nav>
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-4">
+        <div><h2 class="fw-bold mb-1"><i class="bi bi-grid"></i> Módulos de empresa</h2>
+            <p class="text-muted mb-0">{{ empresa.nombre }} · {{ giros_empresa.get(empresa.giro, empresa.giro or 'Sin giro') }}</p></div>
+        <a class="btn btn-outline-secondary" href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}"><i class="bi bi-arrow-left"></i> Volver a empresa</a>
+    </div>
+    <div class="alert alert-info">Los módulos habilitados se ofrecen a las sucursales de esta empresa. El acceso efectivo también requiere permiso individual del usuario. Los módulos especializados todavía no tienen operaciones conectadas y por eso no se pueden activar.</div>
+    <form method="POST">
+        <div class="row g-3">
+            {% for codigo, modulo in catalogo.items() %}
+            <div class="col-md-6 col-xl-4">
+                <div class="card h-100 shadow-sm {% if not modulo.implementado %}border-secondary{% endif %}">
+                    <div class="card-body d-flex gap-3">
+                        <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" {% if codigo != 'DASHBOARD' %}name="modulos" value="{{ codigo }}"{% endif %} id="modulo_{{ codigo }}"
+                                {% if codigo in activos %}checked{% endif %}
+                                {% if not modulo.implementado or codigo == 'DASHBOARD' %}disabled{% endif %}>
+                        </div>
+                        <div><label class="form-check-label fw-semibold" for="modulo_{{ codigo }}">{{ modulo.nombre }}</label>
+                            {% if modulo.implementado %}<div><span class="badge text-bg-success">Disponible</span></div>
+                            {% else %}<div><span class="badge text-bg-secondary">En desarrollo</span></div>{% endif %}
+                            {% if codigo == 'DASHBOARD' %}<small class="text-muted">Siempre activo.</small>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+            <input type="hidden" name="modulos" value="DASHBOARD">
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary" {% if not puede_editar %}disabled{% endif %}><i class="bi bi-save"></i> Guardar módulos</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

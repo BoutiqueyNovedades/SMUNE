@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container-fluid">
+
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+                <i class="bi bi-building"></i> {{ empresa.nombre }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                Vista de empresa · {{ unidades|length }} unidades de negocio
+            </p>
+
+        </div>
+
+
+        {% if current_user.administrador_principal %}
+        <a
+            href="{{ url_for('panel_corporativo') }}"
+            class="btn btn-secondary"
+        >
+            ← Empresas
+        </a>
+        {% else %}
+        <span class="badge text-bg-primary">Mi empresa</span>
+        {% endif %}
+
+    </div>
+
+    <div class="row g-3 mb-4">
+        {% if puede_ver_reportes %}
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Ventas activas históricas</small><h4>{{ total_ventas|moneda }}</h4></div></div></div>
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Compras registradas</small><h4>{{ total_compras|moneda }}</h4></div></div></div>
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Margen indicativo</small><h4>{{ utilidad_estimada|moneda }}</h4><small>No es utilidad neta.</small></div></div></div>
+        {% endif %}
+        {% if puede_gestionar_usuarios %}
+        <div class="col-md-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Productos · Usuarios</small><h4>{{ total_productos }} · {{ total_usuarios }}</h4></div></div></div>
+        {% endif %}
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        {% if puede_ver_reportes %}
+        <a class="btn btn-outline-primary" href="{{ url_for('reportes', empresa_id=empresa.id) }}"><i class="bi bi-file-earmark-bar-graph"></i> Reportes consolidados</a>
+        {% endif %}
+        {% if puede_ver_analisis %}
+        <a class="btn btn-outline-primary" href="{{ url_for('analisis_datos', empresa_id=empresa.id) }}"><i class="bi bi-graph-up-arrow"></i> Análisis de datos</a>
+        {% endif %}
+        {% if puede_administrar %}
+        <a class="btn btn-outline-secondary" href="{{ url_for('administrar_empresa', id=empresa.id) }}"><i class="bi bi-gear"></i> Administración de empresa</a>
+        {% if empresa.activa %}
+        <a class="btn btn-success" href="{{ url_for('nueva_unidad', empresa_id=empresa.id) }}"><i class="bi bi-plus-circle"></i> Nueva sucursal</a>
+        {% endif %}
+        {% endif %}
+    </div>
+
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <strong>
+                Unidades de negocio · {{ empresa.nombre }}
+            </strong>
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            {% if unidades %}
+
+            <div class="row">
+
+                {% for unidad in unidades %}
+
+                <div class="col-md-4 mb-4">
+
+                    <div class="card h-100 shadow-sm">
+
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+
+                                🏪 {{ unidad.nombre }}
+
+                            </h5>
+
+
+                            <p class="text-muted">
+
+                                {% if unidad.direccion %}
+
+                                    {{ unidad.direccion }}
+
+                                {% else %}
+
+                                    Sin dirección registrada
+
+                                {% endif %}
+
+                            </p>
+
+
+                            {% if unidad.activa %}
+
+                                <span class="badge bg-success mb-3">
+                                    Activa
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-danger mb-3">
+                                    Inactiva
+                                </span>
+
+                            {% endif %}
+
+
+                            <div>
+
+                                <a
+                                    href="{{ url_for(
+                                        'panel_unidad_corporativa',
+                                        id=unidad.id
+                                    ) }}"
+                                    class="btn btn-primary w-100"
+                                >
+                                    Ver unidad
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+                <div class="alert alert-warning">
+
+                    Esta empresa no tiene unidades de negocio.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

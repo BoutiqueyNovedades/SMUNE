@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Análisis de datos y finanzas{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow text-primary"></i> Análisis de datos</h2>
+            <p class="text-muted mb-0">Indicadores operativos, financieros y evaluación de escenarios</p>
+        </div>
+        <span class="badge text-bg-info">MXN · {{ desde }} al {{ hasta }}</span>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('analisis_datos') }}" class="row g-3 align-items-end">
+                {% if current_user.administrador_principal %}
+                <div class="col-md-4">
+                    <label class="form-label" for="empresa_id">Empresa</label>
+                    <select class="form-select" id="empresa_id" name="empresa_id" onchange="this.form.submit()">
+                        <option value="">Todas las empresas</option>
+                        {% for empresa in empresas %}
+                        <option value="{{ empresa.id }}" {% if empresa_id == empresa.id %}selected{% endif %}>{{ empresa.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if empresa_id %}
+                <div class="col-md-3">
+                    <label class="form-label" for="unidad_id">Unidad</label>
+                    <select class="form-select" id="unidad_id" name="unidad_id">
+                        <option value="">Todas las unidades</option>
+                        {% for unidad in unidades %}
+                        <option value="{{ unidad.id }}" {% if unidad_id == unidad.id %}selected{% endif %}>{{ unidad.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                {% endif %}
+                <div class="col-md-2">
+                    <label class="form-label" for="desde">Desde</label>
+                    <input class="form-control" type="date" id="desde" name="desde" value="{{ desde }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="hasta">Hasta</label>
+                    <input class="form-control" type="date" id="hasta" name="hasta" value="{{ hasta }}">
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button class="btn btn-primary" type="submit">Aplicar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h4 class="fw-semibold mb-3">Estado financiero simplificado</h4>
+    <div class="row g-3 mb-3">
+        <div class="col-sm-6 col-xl-3"><div class="card h-100 border-primary shadow-sm"><div class="card-body"><div class="text-muted">Ventas activas registradas</div><div class="fs-4 fw-bold">{{ metricas.ventas|moneda }}</div><small>{{ metricas.ventas_cantidad }} operaciones</small></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card h-100 border-warning shadow-sm"><div class="card-body"><div class="text-muted">Compras registradas</div><div class="fs-4 fw-bold">{{ metricas.compras|moneda }}</div><small>{{ metricas.compras_cantidad }} documentos · no equivalen necesariamente al costo de ventas</small></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card h-100 border-success shadow-sm"><div class="card-body"><div class="text-muted">Margen bruto indicativo</div><div class="fs-4 fw-bold">{{ metricas.utilidad_bruta_estimada|moneda }}</div><small>Ventas menos compras del período; no es utilidad neta</small></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card h-100 border-info shadow-sm"><div class="card-body"><div class="text-muted">Inventario a costo promedio</div><div class="fs-4 fw-bold">{{ metricas.inventario_costo_estimado|moneda }}</div><small>Valor estimado de existencias actuales</small></div></div></div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted">Entradas manuales de caja</div><div class="fs-5 fw-semibold text-success">{{ metricas.entradas_caja|moneda }}</div><small>Movimientos clasificados como ENTRADA dentro del período.</small></div></div></div>
+        <div class="col-md-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted">Salidas manuales de caja</div><div class="fs-5 fw-semibold text-danger">{{ metricas.salidas_caja|moneda }}</div><small>Movimientos clasificados como SALIDA; las compras no se asumen como pagos de caja.</small></div></div></div>
+    </div>
+    {% if resumen_unidades|length > 1 %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><strong>Comparativo de unidades autorizadas</strong></div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Unidad</th><th>Ventas activas</th><th>Compras registradas</th><th>Margen indicativo*</th><th>Inventario a costo</th></tr></thead>
+                <tbody>
+                    {% for fila in resumen_unidades %}
+                    <tr><td>{{ fila.nombre }}</td><td>{{ fila.ventas|moneda }}</td><td>{{ fila.compras|moneda }}</td><td>{{ fila.utilidad_bruta_estimada|moneda }}</td><td>{{ fila.inventario_costo_estimado|moneda }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer text-muted small">*Ventas menos compras registradas del período; no representa utilidad neta ni costo de venta.</div>
+    </div>
+    {% endif %}
+    <div class="alert alert-warning"><strong>Alcance:</strong> los datos actuales no registran de forma consistente cobros, gastos por categoría, impuestos, cuentas por pagar/cobrar ni costo de ventas real. Por ello estos indicadores son operativos e indicativos, no estados financieros certificados. Completa esos registros para obtener utilidad neta confiable.</div>
+
+    <div class="row g-4">
+        <div class="col-xl-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white"><h5 class="mb-0"><i class="bi bi-calculator"></i> Evaluación de inversión: VPN, TIR y CAE</h5></div>
+                <div class="card-body">
+                    <p class="text-muted">Ingresa una inversión y flujos anuales constantes. VPN y TIR consideran el flujo neto anual; CAE anualiza la inversión y suma costos anuales, descontando el valor residual.</p>
+                    <form method="POST" action="{{ url_for('analisis_datos', empresa_id=empresa_id or '', unidad_id=unidad_id or '', desde=desde, hasta=hasta) }}" class="row g-3">
+                        <div class="col-md-6"><label class="form-label">Inversión inicial (MXN)</label><input class="form-control" type="number" min="0" step="0.01" name="inversion" value="{{ valores_form.get('inversion', '') }}" required></div>
+                        <div class="col-md-6"><label class="form-label">Ingresos anuales estimados</label><input class="form-control" type="number" min="0" step="0.01" name="ingresos_anuales" value="{{ valores_form.get('ingresos_anuales', '') }}" required></div>
+                        <div class="col-md-6"><label class="form-label">Costos anuales estimados</label><input class="form-control" type="number" min="0" step="0.01" name="costos_anuales" value="{{ valores_form.get('costos_anuales', '') }}" required></div>
+                        <div class="col-md-6"><label class="form-label">Tasa de descuento anual (%)</label><input class="form-control" type="number" min="0" max="500" step="0.01" name="tasa" value="{{ valores_form.get('tasa', 10) }}" required></div>
+                        <div class="col-md-6"><label class="form-label">Plazo (años)</label><input class="form-control" type="number" min="1" max="100" name="anios" value="{{ valores_form.get('anios', 5) }}" required></div>
+                        <div class="col-md-6"><label class="form-label">Valor residual al final</label><input class="form-control" type="number" min="0" step="0.01" name="valor_residual" value="{{ valores_form.get('valor_residual', 0) }}"></div>
+                        <div class="col-12"><button class="btn btn-primary" type="submit"><i class="bi bi-play-fill"></i> Calcular escenario</button></div>
+                    </form>
+                    {% if escenario %}
+                    <hr>
+                    <div class="row g-3">
+                        <div class="col-md-4"><div class="p-3 bg-light rounded"><small>VPN</small><div class="fs-5 fw-bold">{{ escenario.vpn|moneda }}</div></div></div>
+                        <div class="col-md-4"><div class="p-3 bg-light rounded"><small>TIR estimada</small><div class="fs-5 fw-bold">{% if escenario.tir is not none %}{{ '%.2f'|format(escenario.tir * 100) }}%{% else %}No calculable{% endif %}</div></div></div>
+                        <div class="col-md-4"><div class="p-3 bg-light rounded"><small>CAE de costos</small><div class="fs-5 fw-bold">{{ escenario.cae|moneda }} / año</div></div></div>
+                        <div class="col-12"><small>Beneficio neto anual equivalente: <strong>{{ escenario.beneficio_anual_equivalente|moneda }}</strong>. Un VPN positivo indica que el escenario supera la tasa de descuento ingresada, sujeto a la calidad de los supuestos.</small></div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="bi bi-chat-dots"></i> Consultar análisis con IA</h5></div>
+                <div class="card-body d-flex flex-column">
+                    <p class="text-muted">Pregunta sobre tendencias, indicadores o escenarios. La IA recibe solo cifras agregadas autorizadas, nunca nombres de clientes o usuarios.</p>
+                    <div id="chat-respuesta" class="border rounded p-3 mb-3 bg-light" aria-live="polite">Ejemplo: ¿Qué riesgos debería revisar antes de abrir otra sucursal?</div>
+                    <label class="form-label" for="pregunta-ia">Tu pregunta</label>
+                    <textarea id="pregunta-ia" class="form-control mb-3" rows="4" maxlength="2000" placeholder="Escribe tu pregunta sobre los indicadores..."></textarea>
+                    <button id="enviar-ia" type="button" class="btn btn-primary align-self-start"><i class="bi bi-send"></i> Analizar</button>
+                    <small class="text-muted mt-3">Requiere configurar OPENAI_API_KEY en el servidor. Las respuestas son orientativas, no sustituyen asesoría profesional.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(() => {
+    const button = document.getElementById('enviar-ia');
+    const question = document.getElementById('pregunta-ia');
+    const output = document.getElementById('chat-respuesta');
+    button.addEventListener('click', async () => {
+        const pregunta = question.value.trim();
+        if (!pregunta) { output.textContent = 'Escribe una pregunta.'; return; }
+        button.disabled = true;
+        output.textContent = 'Analizando los indicadores autorizados…';
+        try {
+            const response = await fetch('{{ url_for("analisis_datos_chat") }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({pregunta, empresa_id: {{ empresa_id|tojson }}, unidad_id: {{ unidad_id|tojson }}, desde: {{ desde|tojson }}, hasta: {{ hasta|tojson }}})
+            });
+            const data = await response.json();
+            output.textContent = data.respuesta || data.error || 'No se recibió respuesta.';
+        } catch (_) {
+            output.textContent = 'No se pudo conectar con el servicio de análisis.';
+        } finally { button.disabled = false; }
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>Recepción de {{ 'insumos' if pref == 'rest' else 'materiales' }}</h3>
+    {% include "_giro_selector.html" %}
+    <form method="post" action="{{ url_for(pref ~ '_compra_nueva') }}" class="row g-2 mb-4">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-3"><select class="form-select" name="insumo_id" required>
+            {% for i in insumos %}<option value="{{ i.id }}">{{ i.nombre }} ({{ i.unidad_medida }})</option>{% endfor %}
+        </select></div>
+        <div class="col-md-2"><input class="form-control" name="cantidad" type="number" step="any" min="0" placeholder="Cantidad" required></div>
+        <div class="col-md-2"><input class="form-control" name="costo_total" type="number" step="any" min="0" placeholder="Costo total" required></div>
+        <div class="col-md-3"><select class="form-select" name="proveedor_id"><option value="">Sin proveedor</option>
+            {% for p in proveedores %}<option value="{{ p.id }}">{{ p.nombre }}</option>{% endfor %}
+        </select></div>
+        <div class="col-md-2"><button class="btn btn-primary">Recibir</button></div>
+    </form>
+    <table class="table table-sm table-striped">
+        <thead><tr><th>Fecha</th><th>Insumo</th><th>Cantidad</th><th>Costo unit.</th><th>Proveedor</th><th>Ref.</th></tr></thead>
+        <tbody>
+        {% for h in historial %}
+        <tr><td>{{ h.fecha.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ h.insumo.nombre }}</td><td>{{ '%.2f'|format(h.cantidad) }}</td>
+            <td>${{ '%.2f'|format(h.costo_unitario) }}</td><td>{{ h.proveedor.nombre if h.proveedor else '—' }}</td><td>{{ h.referencia }}</td></tr>
+        {% else %}<tr><td colspan="6" class="text-muted">Sin recepciones.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

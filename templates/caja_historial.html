@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mt-3"><i class="bi bi-clock-history"></i> Historial de jornadas de caja</h3>
+
+{% if unidades|length > 1 %}
+<form method="get" class="row g-2 my-2">
+  <div class="col-auto">
+    <select name="unidad_id" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">Todas las sucursales</option>
+      {% for u in unidades %}<option value="{{ u.id }}" {{ 'selected' if u.id == unidad_id }}>{{ u.nombre }}</option>{% endfor %}
+    </select>
+  </div>
+</form>
+{% endif %}
+
+{% if es_gerente %}
+<h5 class="mt-3">Consolidado por sucursal</h5>
+<table class="table table-sm">
+  <thead><tr><th>Sucursal</th><th>Jornadas</th><th>Ventas</th><th>Efectivo esperado</th><th>Diferencias</th></tr></thead>
+  <tbody>
+  {% for nombre, f in consolidado.items() %}
+    <tr><td>{{ nombre }}</td><td>{{ f.jornadas }}</td><td>${{ '%.2f'|format(f.ventas) }}</td>
+        <td>${{ '%.2f'|format(f.esperado) }}</td><td>${{ '%.2f'|format(f.diferencia) }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<h5 class="mt-3">Jornadas</h5>
+<table class="table table-sm">
+  <thead><tr><th>#</th><th>Sucursal</th><th>Apertura</th><th>Cierre</th><th>Saldo inicial</th><th>Ventas</th><th>Debe tener</th>
+    {% if es_gerente %}<th>Contado</th><th>Diferencia</th>{% endif %}<th>Estado</th><th></th></tr></thead>
+  <tbody>
+  {% for c, r in jornadas %}
+    <tr>
+      <td>{{ c.id }}</td><td>{{ c.unidad.nombre if c.unidad }}</td>
+      <td>{{ c.fecha_apertura.strftime('%d/%m/%Y %H:%M') }}</td>
+      <td>{{ c.fecha_cierre.strftime('%d/%m/%Y %H:%M') if c.fecha_cierre else '-' }}</td>
+      <td>${{ '%.2f'|format(c.fondo_inicial or 0) }}</td>
+      <td>${{ '%.2f'|format(r.total_ventas) }}</td>
+      <td>${{ '%.2f'|format(r.esperado) }}</td>
+      {% if es_gerente %}<td>{{ '$%.2f'|format(c.efectivo_final) if not c.abierta else '-' }}</td>
+      <td>{{ '$%.2f'|format(c.diferencia or 0) if not c.abierta else '-' }}</td>{% endif %}
+      <td>{{ 'Abierta' if c.abierta else 'Cerrada' }}</td>
+      <td><a href="{{ url_for('detalle_caja', id=c.id) }}">Detalle</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="11" class="text-muted">Sin jornadas.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

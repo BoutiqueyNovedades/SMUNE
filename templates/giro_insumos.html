@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>{{ 'Insumos' if pref == 'rest' else 'Materias primas' }}</h3>
+    {% include "_giro_selector.html" %}
+    <form method="post" action="{{ url_for(pref ~ '_insumo_nuevo') }}" class="row g-2 mb-4">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-4"><input class="form-control" name="nombre" placeholder="Nombre" required></div>
+        <div class="col-md-2"><input class="form-control" name="unidad_medida" placeholder="Unidad (kg, m, pza)"></div>
+        <div class="col-md-2"><input class="form-control" name="stock_minimo" type="number" step="any" min="0" placeholder="Mínimo"></div>
+        <div class="col-md-2"><button class="btn btn-primary">Agregar</button></div>
+    </form>
+    <table class="table table-sm table-striped">
+        <thead><tr><th>Nombre</th><th>Unidad</th><th>Existencia</th><th>Costo prom.</th><th>Mínimo</th><th></th></tr></thead>
+        <tbody>
+        {% for i in insumos %}
+        <tr class="{{ 'table-warning' if i.existencia <= i.stock_minimo }}">
+            <td>{{ i.nombre }}{% if not i.activo %} <span class="badge bg-secondary">inactivo</span>{% endif %}</td>
+            <td>{{ i.unidad_medida }}</td>
+            <td>{{ '%.2f'|format(i.existencia) }}</td>
+            <td>${{ '%.2f'|format(i.costo_promedio) }}</td>
+            <td>{{ '%.2f'|format(i.stock_minimo) }}</td>
+            <td><form method="post" action="{{ url_for(pref ~ '_insumo_toggle', id=i.id) }}"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-sm btn-outline-secondary">{{ 'Desactivar' if i.activo else 'Activar' }}</button></form></td>
+        </tr>
+        {% else %}<tr><td colspan="6" class="text-muted">Sin registros.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

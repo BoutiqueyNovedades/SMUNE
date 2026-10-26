@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mt-3">
+  <h3><i class="bi bi-star"></i> Puntos de {{ cliente.nombre }}</h3>
+  <a href="{{ url_for('detalle_cliente', id=cliente.id) }}" class="btn btn-outline-secondary">Volver</a>
+</div>
+<p>Puntos actuales: <strong>{{ cliente.puntos or 0 }}</strong></p>
+<form method="post" action="{{ url_for('ajustar_puntos', id=cliente.id) }}" class="row g-2 mb-3">
+  <div class="col-md-2"><input type="number" name="puntos" class="form-control" placeholder="Puntos (+/-)" required></div>
+  <div class="col-md-5"><input type="text" name="motivo" class="form-control" placeholder="Motivo"></div>
+  <div class="col-auto"><button class="btn btn-primary">Ajustar</button></div>
+</form>
+<table class="table table-sm">
+  <thead><tr><th>Fecha</th><th>Tipo</th><th>Puntos</th><th>Usuario</th><th>Detalle</th></tr></thead>
+  <tbody>
+  {% for m in movimientos %}
+  <tr><td>{{ m.fecha.strftime('%d/%m/%Y %H:%M') if m.fecha else '' }}</td><td>{{ m.tipo }}</td><td>{{ m.puntos }}</td><td>{{ m.usuario.nombre if m.usuario else '' }}</td><td>{{ m.observaciones or '' }}</td></tr>
+  {% else %}<tr><td colspan="5" class="text-muted text-center">Sin movimientos</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

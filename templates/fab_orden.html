@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <a href="{{ url_for('fab_ordenes') }}">&larr; Órdenes</a>
+    <h3>{{ o.folio }} — {{ o.producto.nombre }} × {{ o.cantidad }} <span class="badge bg-info">{{ o.estado }}</span></h3>
+    {% include "_giro_selector.html" %}
+    <div class="mb-3">
+        {% for e in estados %}<span class="badge {{ 'bg-primary' if e == o.estado else 'bg-light text-dark border' }}">{{ e }}</span> {% endfor %}
+    </div>
+    <h5>Materiales requeridos</h5>
+    <table class="table table-sm">
+        <thead><tr><th>Material</th><th>Requerido</th><th>Disponible</th></tr></thead>
+        <tbody>{% for m, req in reqs %}
+        <tr class="{{ 'table-danger' if o.estado == 'PLANIFICADA' and m.insumo.existencia < req }}"><td>{{ m.insumo.nombre }}</td><td>{{ '%.3f'|format(req) }} {{ m.insumo.unidad_medida }}</td><td>{{ '%.3f'|format(m.insumo.existencia) }}</td></tr>
+        {% endfor %}</tbody>
+    </table>
+    <p>Costo materiales: ${{ '%.2f'|format(o.costo_materiales) }}
+       {% if o.estado == 'TERMINADA' %} · Mano de obra: ${{ '%.2f'|format(o.mano_obra) }} · Desperdicio: ${{ '%.2f'|format(o.costo_desperdicio) }} · Producido: {{ o.cantidad_producida }} · Costo unitario: ${{ '%.2f'|format(o.costo_unitario) }}{% endif %}</p>
+    {% if puede_procesar and o.estado in estados[:5] %}
+    <form method="post" action="{{ url_for('fab_orden_avanzar', id=o.id) }}" class="d-inline"><input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <button class="btn btn-primary">Avanzar a {{ estados[estados.index(o.estado) + 1] }}</button></form>
+    {% endif %}
+    {% if puede_procesar and o.estado == 'ACABADO' %}
+    <form method="post" action="{{ url_for('fab_orden_terminar', id=o.id) }}" class="row g-2 mt-2">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-3"><input class="form-control" name="cantidad_producida" type="number" min="1" max="{{ o.cantidad }}" value="{{ o.cantidad }}" required></div>
+        <div class="col-md-3"><input class="form-control" name="mano_obra" type="number" step="0.01" min="0" placeholder="Mano de obra"></div>
+        <div class="col-md-3"><button class="btn btn-success">Terminar y enviar a inventario</button></div>
+    </form>
+    {% endif %}
+    {% if o.estado == 'PLANIFICADA' %}
+    <form method="post" action="{{ url_for('fab_orden_cancelar', id=o.id) }}" class="d-inline"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-outline-danger">Cancelar orden</button></form>
+    {% endif %}
+</div>
+{% endblock %}

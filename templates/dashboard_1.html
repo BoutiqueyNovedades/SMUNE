@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mt-3">Dashboard SMUNE</h3>
+<div class="row mt-4">
+  <div class="col-md-3"><div class="card text-bg-primary"><div class="card-body"><h5>Productos</h5><h2>{{ total_productos if total_productos is defined else 0 }}</h2></div></div></div>
+  <div class="col-md-3"><div class="card text-bg-success"><div class="card-body"><h5>Ventas Hoy</h5><h2>${{ ventas_hoy if ventas_hoy is defined else 0 }}</h2></div></div></div>
+  <div class="col-md-3"><div class="card text-bg-warning"><div class="card-body"><h5>Clientes</h5><h2>{{ total_clientes if total_clientes is defined else 0 }}</h2></div></div></div>
+  <div class="col-md-3"><div class="card text-bg-info"><div class="card-body"><h5>Stock Bajo</h5><h2>{{ stock_bajo if stock_bajo is defined else 0 }}</h2></div></div></div>
+</div>
+<p class="mt-4 text-muted">Bienvenido {{ current_user.nombre }} - Sistema SMUNE operativo.</p>
+{% endblock %}

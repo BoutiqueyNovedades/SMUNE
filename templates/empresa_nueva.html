@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nueva Empresa
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container">
+
+<div class="row justify-content-center">
+
+<div class="col-lg-8">
+
+<div class="card shadow">
+
+<div class="card-header bg-success text-white">
+
+<h3>
+
+<i class="bi bi-building-add"></i>
+
+Nueva Empresa
+
+</h3>
+
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label>Nombre Comercial</label>
+
+<input
+class="form-control"
+name="nombre"
+required>
+
+</div>
+
+<div class="mb-3">
+<label for="giro">Giro o actividad de la empresa</label>
+<select id="giro" class="form-select" name="giro" required>
+	{% for codigo, nombre_giro in giros_empresa.items() %}
+	<option value="{{ codigo }}" {% if codigo == 'TIENDA' %}selected{% endif %}>{{ nombre_giro }}</option>
+	{% endfor %}
+</select>
+<div class="form-text">El giro propone módulos comunes. Los módulos especializados se activarán cuando estén implementados.</div>
+</div>
+
+<div class="mb-3">
+
+<label>Razón Social</label>
+
+<input
+class="form-control"
+name="razon_social">
+
+</div>
+
+<div class="mb-3">
+
+<label>RFC</label>
+
+<input
+class="form-control"
+name="rfc">
+
+</div>
+
+<div class="mb-3">
+
+<label>Teléfono</label>
+
+<input
+class="form-control"
+name="telefono">
+
+</div>
+
+<div class="mb-3">
+
+<label>Correo</label>
+
+<input
+type="email"
+class="form-control"
+name="correo">
+
+</div>
+
+<div class="mb-3">
+
+<label>Dirección</label>
+
+<textarea
+class="form-control"
+name="direccion"></textarea>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Ciudad</label>
+<input class="form-control" name="ciudad">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Estado</label>
+<input class="form-control" name="estado">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>País</label>
+<input class="form-control" name="pais" value="México">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Código postal</label>
+<input class="form-control" name="codigo_postal">
+</div>
+
+</div>
+
+<div class="d-grid">
+
+<button
+class="btn btn-success">
+
+Crear Empresa
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mt-3"><h3><i class="bi bi-truck"></i> Proveedores</h3><a href="{{ url_for('nuevo_proveedor') }}" class="btn btn-primary"><i class="bi bi-plus"></i> Nuevo</a></div>
+<div class="card mt-3"><div class="card-body table-responsive">
+<table class="table table-hover align-middle">
+<thead><tr><th>Nombre</th><th>Contacto</th><th>Teléfono</th><th>Correo</th><th>Estado</th><th></th></tr></thead>
+<tbody>
+{% for p in proveedores %}
+<tr>
+  <td>{{ p.nombre }}</td><td>{{ p.contacto or '-' }}</td><td>{{ p.telefono or '-' }}</td><td>{{ p.correo or '-' }}</td>
+  <td>{{ 'Activo' if p.activo else 'Inactivo' }}</td>
+  <td class="text-end">
+    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('editar_proveedor', id=p.id) }}">Editar</a>
+    <form class="d-inline" method="POST" action="{{ url_for('eliminar_proveedor', id=p.id) }}" onsubmit="return confirm('¿Desactivar este proveedor?')">
+      <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+    </form>
+  </td>
+</tr>
+{% else %}
+<tr><td colspan="6" class="text-center text-muted">No hay proveedores registrados</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div></div>
+{% endblock %}

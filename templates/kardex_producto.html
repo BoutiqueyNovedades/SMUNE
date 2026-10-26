@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}
+Kardex Producto
+{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between mb-3">
+
+    <h2>
+
+        Kardex del Producto
+
+    </h2>
+
+    <a
+    href="{{ url_for('productos') }}"
+    class="btn btn-secondary">
+
+        Regresar
+
+    </a>
+
+</div>
+
+<div class="card mb-4">
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-3">
+
+                <strong>Código:</strong><br>
+
+                {{ producto.codigo }}
+
+            </div>
+
+            <div class="col-md-3">
+
+                <strong>Producto:</strong><br>
+
+                {{ producto.nombre }}
+
+            </div>
+
+            <div class="col-md-2">
+
+                <strong>Talla:</strong><br>
+
+                {{ producto.talla }}
+
+            </div>
+
+            <div class="col-md-2">
+
+                <strong>Color:</strong><br>
+
+                {{ producto.color }}
+
+            </div>
+
+            <div class="col-md-2">
+
+                <strong>Stock Actual:</strong><br>
+
+                <span class="badge bg-success">
+
+                    {{ stock_producto(producto.id, unidad_actual.id) }}
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<table
+class="table table-bordered table-striped"
+id="tabla">
+
+<thead>
+
+<tr>
+
+<th>
+
+Fecha
+
+</th>
+
+<th>
+
+Movimiento
+
+</th>
+
+<th>
+
+Cantidad
+
+</th>
+
+<th>
+
+Referencia
+
+</th>
+
+<th>
+
+Usuario
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for movimiento in movimientos %}
+
+<tr>
+
+<td>
+
+{{ movimiento.fecha.strftime("%d/%m/%Y %H:%M") }}
+
+</td>
+
+<td>
+
+{{ movimiento.tipo }}
+
+</td>
+
+<td>
+
+{{ movimiento.cantidad }}
+
+</td>
+
+<td>
+
+{{ movimiento.referencia }}
+
+</td>
+
+<td>
+
+{{ movimiento.usuario.nombre if movimiento.usuario else "" }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+$(document).ready(function(){
+
+$('#tabla').DataTable({
+
+language:{
+url:'//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+}
+
+});
+
+});
+
+</script>
+
+{% endblock %}

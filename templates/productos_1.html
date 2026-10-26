@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <h3><i class="bi bi-box"></i> Productos - SMUNE</h3>
+  <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary"><i class="bi bi-plus"></i> Nuevo Producto</a>
+</div>
+<div class="card mt-3">
+  <div class="card-body">
+    <table class="table table-striped table-hover">
+      <thead><tr><th>Código</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Acciones</th></tr></thead>
+      <tbody>
+      {% for p in productos %}
+        <tr><td>{{ p.codigo }}</td><td>{{ p.nombre }}</td><td>${{ p.precio_venta }}</td><td>{{ p.stock if p.stock is defined else '0' }}</td>
+        <td><a href="{{ url_for('editar_producto', id=p.id) }}" class="btn btn-sm btn-warning">Editar</a></td></tr>
+      {% else %}
+        <tr><td colspan="5" class="text-center">No hay productos. Crea uno nuevo.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

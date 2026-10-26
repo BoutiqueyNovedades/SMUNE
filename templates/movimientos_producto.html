@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mt-3">
+  <h3><i class="bi bi-clock-history"></i> Movimientos de {{ producto.nombre }}</h3>
+  <a href="{{ url_for('productos') }}" class="btn btn-outline-secondary">Volver</a>
+</div>
+<table class="table table-sm mt-3">
+  <thead><tr><th>Fecha</th><th>Tipo</th><th>Cantidad</th><th>Referencia</th><th>Usuario</th><th>Observaciones</th></tr></thead>
+  <tbody>
+  {% for m in movimientos %}
+  <tr><td>{{ m.fecha.strftime('%d/%m/%Y %H:%M') if m.fecha else '' }}</td><td>{{ m.tipo }}</td><td>{{ m.cantidad }}</td><td>{{ m.referencia or '' }}</td><td>{{ m.usuario.nombre if m.usuario else '' }}</td><td>{{ m.observaciones or '' }}</td></tr>
+  {% else %}<tr><td colspan="6" class="text-muted text-center">Sin movimientos</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

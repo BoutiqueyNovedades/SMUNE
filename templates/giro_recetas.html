@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>{{ titulo }}</h3>
+    {% include "_giro_selector.html" %}
+    <table class="table table-sm table-striped">
+        <thead><tr><th>{{ col }}</th><th>Precio</th><th>Ingredientes</th><th>Costo</th><th></th></tr></thead>
+        <tbody>
+        {% for f in filas %}
+        <tr><td>{{ f.nombre }}</td><td>${{ '%.2f'|format(f.precio or 0) }}</td><td>{{ f.n }}</td><td>${{ '%.2f'|format(f.costo) }}</td>
+            <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for(detalle, id=f.id) }}">Editar</a></td></tr>
+        {% else %}<tr><td colspan="5" class="text-muted">Sin registros.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

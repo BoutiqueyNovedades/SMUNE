@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>Cocina</h3>
+    {% include "_giro_selector.html" %}
+    <div class="row g-3">
+        {% for d in detalles %}
+        <div class="col-md-4">
+            <div class="card"><div class="card-body">
+                <h5>{{ d.cantidad }} × {{ d.nombre }}</h5>
+                <p class="mb-1">{{ d.pedido.folio }} · {{ d.pedido.tipo }}{% if d.pedido.mesa %} · Mesa {{ d.pedido.mesa.nombre }}{% endif %}</p>
+                {% if d.nota %}<p class="text-muted">{{ d.nota }}</p>{% endif %}
+                <span class="badge bg-secondary">{{ d.estado_cocina }}</span>
+                <div class="d-flex gap-2 mt-2">
+                    {% if d.estado_cocina == 'PENDIENTE' %}
+                    <form method="post" action="{{ url_for('rest_cocina_estado', det_id=d.id, estado='PREPARANDO') }}"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-sm btn-warning">Preparar</button></form>
+                    {% endif %}
+                    <form method="post" action="{{ url_for('rest_cocina_estado', det_id=d.id, estado='LISTO') }}"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-sm btn-success">Listo</button></form>
+                </div>
+            </div></div>
+        </div>
+        {% else %}<p class="text-muted">No hay pedidos pendientes.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nuevo Usuario
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container-fluid">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-success text-white">
+
+                    <h4 class="mb-0">
+
+                        <i class="bi bi-person-plus"></i>
+
+                        Nuevo Usuario
+
+                    </h4>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="alert alert-info">
+
+                        <strong>Unidad de negocio:</strong>
+
+                        {{ unidad.nombre }}
+
+                        <br>
+
+                        <strong>Empresa:</strong>
+
+                        {{ unidad.empresa.nombre }}
+
+                    </div>
+
+                    <form method="POST">
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+
+                                Nombre completo
+
+                            </label>
+
+                            <input
+                                type="text"
+                                name="nombre"
+                                class="form-control"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+
+                                Nombre de usuario
+
+                            </label>
+
+                            <input
+                                type="text"
+                                name="usuario"
+                                class="form-control"
+                                required
+                            >
+
+                            <small class="text-muted">
+
+                                Debe ser único en todo SMUNE.
+
+                            </small>
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+
+                                Contraseña temporal
+
+                            </label>
+
+                            <input
+                                type="password"
+                                name="password"
+                                class="form-control"
+                                required
+                            >
+
+                            <small class="text-muted">
+
+                                El usuario deberá cambiarla
+                                durante su primer acceso.
+
+                            </small>
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+
+                                Rol
+
+                            </label>
+
+                            <select
+                                name="rol"
+                                id="rol"
+                                class="form-select"
+                                required
+                            >
+
+                                {% for rol in roles_disponibles %}
+                                <option value="{{ rol }}">{% if rol == 'ADMIN' %}Gerente de sucursal{% else %}{{ rol.replace('_', ' ').title() }}{% endif %}</option>
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Permisos por módulo</label>
+                            <div class="row g-2">
+                                {% for modulo in modulos %}
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input permiso-modulo" type="checkbox" name="modulos" value="{{ modulo }}" id="nuevo_modulo_{{ loop.index }}" data-modulo="{{ modulo }}">
+                                        <label class="form-check-label" for="nuevo_modulo_{{ loop.index }}">{{ modulo.replace('_', ' ') }}</label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-text">El panel de accesos puede ajustarse luego desde «Permisos» en la unidad.</div>
+                        </div>
+
+
+                        <div class="alert alert-warning">
+
+                            <i class="bi bi-shield-lock"></i>
+
+                            Este usuario quedará asignado
+                            exclusivamente a esta unidad de negocio.
+
+                        </div>
+
+
+                        <div class="d-flex gap-2">
+
+                            <button
+                                type="submit"
+                                class="btn btn-success"
+                            >
+
+                                <i class="bi bi-check-circle"></i>
+
+                                Crear Usuario
+
+                            </button>
+
+
+                            <a
+                                href="{{ url_for(
+                                    'usuarios_unidad',
+                                    id=unidad.id
+                                ) }}"
+                                class="btn btn-secondary"
+                            >
+
+                                <i class="bi bi-arrow-left"></i>
+
+                                Cancelar
+
+                            </a>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+    const role = document.getElementById('rol');
+    const permissions = [...document.querySelectorAll('.permiso-modulo')];
+    const defaults = {
+        ADMIN: ['DASHBOARD', 'PRODUCTOS', 'INVENTARIO', 'COMPRAS', 'VENTAS', 'CLIENTES', 'PROVEEDORES', 'APARTADOS', 'CAJA', 'REPORTES', 'ANALISIS_DATOS', 'SEGURIDAD', 'CONFIGURACION'],
+        SUPERVISOR: ['DASHBOARD', 'PRODUCTOS', 'INVENTARIO', 'VENTAS', 'CLIENTES', 'REPORTES'],
+        EMPLEADO: ['DASHBOARD', 'PRODUCTOS', 'VENTAS']
+    };
+    const applyDefaults = () => {
+        const selected = new Set(defaults[role.value] || defaults.EMPLEADO);
+        permissions.forEach(input => { input.checked = selected.has(input.dataset.modulo); });
+    };
+    role.addEventListener('change', applyDefaults);
+    applyDefaults();
+})();
+</script>
+{% endblock %}

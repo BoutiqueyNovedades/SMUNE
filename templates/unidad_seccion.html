@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<nav aria-label="Ruta"><ol class="breadcrumb mt-3">
+  {% if current_user.administrador_principal %}<li class="breadcrumb-item"><a href="{{ url_for('empresas') }}">Empresas</a></li>{% endif %}
+  <li class="breadcrumb-item"><a href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}">{{ empresa.nombre }}</a></li>
+  <li class="breadcrumb-item"><a href="{{ url_for('panel_unidad_corporativa', id=unidad.id) }}">{{ unidad.nombre }}</a></li>
+  <li class="breadcrumb-item active">{{ secciones[seccion] }}</li>
+</ol></nav>
+
+<ul class="nav nav-pills mb-3">
+  {% for clave, titulo in secciones.items() %}
+  <li class="nav-item"><a class="nav-link {{ 'active' if clave == seccion }}" href="{{ url_for('unidad_seccion', id=unidad.id, seccion=clave) }}">{{ titulo }}</a></li>
+  {% endfor %}
+  <li class="nav-item"><a class="nav-link" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='cajas') }}">Caja e historial</a></li>
+</ul>
+
+<h4>{{ secciones[seccion] }} · {{ unidad.nombre }}</h4>
+<p class="text-muted small">Consulta de solo lectura. Muestra los registros más recientes de esta sucursal.</p>
+<div class="table-responsive">
+<table class="table table-sm table-striped">
+  <thead><tr>{% for c in columnas %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for fila in filas %}
+    <tr>{% for celda in fila %}<td>{{ celda }}</td>{% endfor %}</tr>
+  {% else %}
+    <tr><td colspan="{{ columnas|length }}" class="text-muted">Sin registros.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

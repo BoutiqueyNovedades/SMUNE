@@ -1,0 +1,18 @@
+<h5 class="mt-4">Ventas de la jornada</h5>
+<table class="table table-sm">
+  <thead><tr><th>Folio</th><th>Fecha</th><th>Pago</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+  <tbody>
+  {% for v in resumen.ventas %}
+    <tr class="{{ 'table-danger' if v.estado != 'ACTIVA' }}">
+      <td>{{ v.numero_venta }}</td>
+      <td>{{ v.fecha.strftime('%d/%m/%Y %H:%M') if v.fecha }}</td>
+      <td>{{ v.metodo_pago }}</td>
+      <td>${{ '%.2f'|format(v.total or 0) }}</td>
+      <td>{{ v.estado }}</td>
+      <td><a href="{{ url_for('detalle_venta', id=v.id) }}">Detalle</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="text-muted">Sin ventas.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>

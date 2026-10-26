@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}
+Permisos
+{% endblock %}
+
+{% block contenido %}
+
+<h2>
+
+Permisos del Rol
+
+<strong>
+
+{{ rol.nombre }}
+
+</strong>
+
+</h2>
+
+<form method="POST">
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Módulo</th>
+
+<th>Ver</th>
+
+<th>Crear</th>
+
+<th>Editar</th>
+
+<th>Eliminar</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for modulo in modulos %}
+
+{% set p = permisos.get(modulo.id) %}
+
+<tr>
+
+<td>
+
+{{ modulo.nombre }}
+
+</td>
+
+<td>
+
+<input
+type="checkbox"
+name="ver_{{ modulo.id }}"
+
+{% if p and p.puede_ver %}
+checked
+{% endif %}
+
+>
+
+</td>
+
+<td>
+
+<input
+type="checkbox"
+name="crear_{{ modulo.id }}"
+
+{% if p and p.puede_crear %}
+checked
+{% endif %}
+
+>
+
+</td>
+
+<td>
+
+<input
+type="checkbox"
+name="editar_{{ modulo.id }}"
+
+{% if p and p.puede_editar %}
+checked
+{% endif %}
+
+>
+
+</td>
+
+<td>
+
+<input
+type="checkbox"
+name="eliminar_{{ modulo.id }}"
+
+{% if p and p.puede_eliminar %}
+checked
+{% endif %}
+
+>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+<button
+class="btn btn-success">
+
+Guardar Permisos
+
+</button>
+
+<a
+href="{{ url_for('roles') }}"
+class="btn btn-secondary">
+
+Cancelar
+
+</a>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>Mesas y pedidos</h3>
+    {% include "_giro_selector.html" %}
+    <div class="row">
+        <div class="col-lg-5">
+            <h5>Nuevo pedido</h5>
+            <form method="post" action="{{ url_for('rest_pedido_nuevo') }}" class="row g-2 mb-3">
+                <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+                <div class="col-6"><select class="form-select" name="tipo"><option value="SALON">Salón</option><option value="LLEVAR">Para llevar</option><option value="DOMICILIO">Domicilio</option></select></div>
+                <div class="col-6"><select class="form-select" name="mesa_id">
+                    {% for m in mesas if m.id not in ocupadas %}<option value="{{ m.id }}">{{ m.nombre }}</option>{% endfor %}
+                </select></div>
+                <div class="col-6"><input class="form-control" name="cliente_nombre" placeholder="Cliente"></div>
+                <div class="col-6"><input class="form-control" name="telefono" placeholder="Teléfono"></div>
+                <div class="col-12"><input class="form-control" name="direccion" placeholder="Dirección (domicilio)"></div>
+                <div class="col-12"><button class="btn btn-primary">Abrir pedido</button></div>
+            </form>
+            <h5>Mesas</h5>
+            <form method="post" action="{{ url_for('rest_mesa_nueva') }}" class="d-flex gap-2 mb-2">
+                <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+                <input class="form-control" name="nombre" placeholder="Nombre de mesa" required><button class="btn btn-outline-primary">Crear</button>
+            </form>
+            {% for m in mesas %}<span class="badge {{ 'bg-danger' if m.id in ocupadas else 'bg-success' }}">{{ m.nombre }}</span> {% endfor %}
+        </div>
+        <div class="col-lg-7">
+            <h5>Pedidos recientes</h5>
+            <table class="table table-sm table-striped">
+                <thead><tr><th>Folio</th><th>Tipo</th><th>Mesa</th><th>Estado</th><th>Total</th><th></th></tr></thead>
+                <tbody>
+                {% for p in pedidos %}
+                <tr><td>{{ p.folio }}</td><td>{{ p.tipo }}</td><td>{{ p.mesa.nombre if p.mesa else '—' }}</td><td>{{ p.estado }}</td><td>${{ '%.2f'|format(p.total) }}</td>
+                    <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('rest_pedido', id=p.id) }}">Abrir</a></td></tr>
+                {% else %}<tr><td colspan="6" class="text-muted">Sin pedidos.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

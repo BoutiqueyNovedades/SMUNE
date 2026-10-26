@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">
+                <i class="bi bi-people"></i>
+                Usuarios
+            </h2>
+            <p class="text-muted mb-0">
+                Administración de usuarios de tu ámbito
+            </p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-person-lines-fill"></i>
+                Lista de usuarios
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Usuario</th>
+                            <th>Empresa</th>
+                            <th>Unidad</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for usuario in usuarios %}
+                        <tr>
+                            <td><strong>{{ usuario.nombre }}</strong></td>
+                            <td>{{ usuario.usuario }}</td>
+                            <td>{{ usuario.empresa.nombre if usuario.empresa else '-' }}</td>
+                            <td>{{ usuario.unidad.nombre if usuario.unidad else '-' }}</td>
+                            <td>
+                                {% if usuario.administrador_principal %}
+                                    <span class="badge bg-dark">Administrador Principal</span>
+                                {% elif usuario.rol == 'ADMIN' %}
+                                    <span class="badge bg-primary">Gerente de sucursal</span>
+                                {% elif usuario.rol == 'GERENTE_EMPRESA' %}
+                                    <span class="badge bg-primary">Gerente de empresa</span>
+                                {% else %}
+                                    <span class="badge bg-primary">{{ usuario.rol }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if usuario.activo %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not usuario.administrador_principal and (current_user.administrador_principal or (usuario.rol != 'ADMIN' and usuario.empresa_id == current_user.empresa_id)) %}
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <a
+                                            href="{{ url_for('editar_usuario', id=usuario.id) }}"
+                                            class="btn btn-warning btn-sm"
+                                        >
+                                            <i class="bi bi-pencil"></i>
+                                            Editar
+                                        </a>
+                                        <a
+                                            href="{{ url_for('permisos_usuario', id=usuario.id) }}"
+                                            class="btn btn-info btn-sm"
+                                        >
+                                            <i class="bi bi-shield-check"></i>
+                                            Permisos
+                                        </a>
+                                        {% if not usuario.administrador_principal %}
+                                            <form method="POST" action="{{ url_for('restablecer_password_usuario', id=usuario.id) }}" class="d-inline" onsubmit="return confirm('¿Generar una nueva contraseña temporal para este usuario?');">
+                                                <button type="submit" class="btn btn-outline-info btn-sm"><i class="bi bi-key"></i> Restablecer clave</button>
+                                            </form>
+                                            <form method="POST" action="{{ url_for('cambiar_estado_usuario', id=usuario.id) }}" class="d-inline">
+                                                <button type="submit" class="btn btn-sm {% if usuario.activo %}btn-danger{% else %}btn-success{% endif %}">
+                                                    {% if usuario.activo %}Desactivar{% else %}Activar{% endif %}
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ url_for('eliminar_usuario', id=usuario.id) }}" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">Sin acciones disponibles</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No existen usuarios registrados.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

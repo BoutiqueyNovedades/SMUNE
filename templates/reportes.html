@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-file-earmark-bar-graph text-primary"></i> Reportes</h2>
+            <p class="text-muted mb-0">{% if unidad_id %}Alcance: sucursal{% elif empresa_id %}Alcance: empresa consolidada{% else %}Alcance: todas las empresas{% endif %} · solo información registrada</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-success" href="{{ url_for('exportar_reporte_excel', empresa_id=empresa_id or '', unidad_id=unidad_id or '', desde=desde, hasta=hasta) }}"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+            <a class="btn btn-outline-danger" href="{{ url_for('exportar_reporte_pdf', empresa_id=empresa_id or '', unidad_id=unidad_id or '', desde=desde, hasta=hasta) }}"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('reportes') }}" class="row g-3 align-items-end">
+                {% if current_user.administrador_principal or current_user.rol == 'GERENTE_EMPRESA' %}
+                <div class="col-md-4">
+                    <label class="form-label" for="empresa_id">Empresa</label>
+                    <select class="form-select" id="empresa_id" name="empresa_id" onchange="this.form.submit()">
+                        <option value="">{% if current_user.administrador_principal %}Todas las empresas{% else %}Selecciona empresa{% endif %}</option>
+                        {% for empresa in empresas %}<option value="{{ empresa.id }}" {% if empresa_id == empresa.id %}selected{% endif %}>{{ empresa.nombre }}</option>{% endfor %}
+                    </select>
+                </div>
+                {% if empresa_id %}
+                <div class="col-md-3">
+                    <label class="form-label" for="unidad_id">Unidad</label>
+                    <select class="form-select" id="unidad_id" name="unidad_id">
+                        <option value="">Todas las unidades</option>
+                        {% for unidad in unidades %}<option value="{{ unidad.id }}" {% if unidad_id == unidad.id %}selected{% endif %}>{{ unidad.nombre }}</option>{% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                {% endif %}
+                <div class="col-md-2"><label class="form-label" for="desde">Desde</label><input class="form-control" type="date" id="desde" name="desde" value="{{ desde }}" required></div>
+                <div class="col-md-2"><label class="form-label" for="hasta">Hasta</label><input class="form-control" type="date" id="hasta" name="hasta" value="{{ hasta }}" required></div>
+                <div class="col-md-1 d-grid"><button class="btn btn-primary" type="submit">Ver</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3"><div class="card border-primary shadow-sm h-100"><div class="card-body"><small class="text-muted">Ventas activas</small><h4>{{ resumen.ventas|moneda }}</h4><small>{{ resumen.ventas_cantidad }} ventas registradas</small></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card border-warning shadow-sm h-100"><div class="card-body"><small class="text-muted">Compras registradas</small><h4>{{ resumen.compras|moneda }}</h4><small>{{ resumen.compras_cantidad }} documentos</small></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card border-success shadow-sm h-100"><div class="card-body"><small class="text-muted">Ventas menos compras</small><h4>{{ resumen.utilidad_bruta_estimada|moneda }}</h4><small>Margen indicativo, no utilidad neta</small></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card border-info shadow-sm h-100"><div class="card-body"><small class="text-muted">Inventario a costo promedio</small><h4>{{ resumen.inventario_costo_estimado|moneda }}</h4><small>Existencia al momento de consulta</small></div></div></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6"><div class="card shadow-sm"><div class="card-body"><span class="text-muted">Entradas manuales de caja</span><div class="fs-5 text-success fw-semibold">{{ resumen.entradas_caja|moneda }}</div></div></div></div>
+        <div class="col-md-6"><div class="card shadow-sm"><div class="card-body"><span class="text-muted">Salidas manuales de caja</span><div class="fs-5 text-danger fw-semibold">{{ resumen.salidas_caja|moneda }}</div><small>No se clasifican automáticamente como gastos.</small></div></div></div>
+    </div>
+
+    {% if comparativo %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><strong>Comparación entre sucursales</strong></div>
+        <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+            <thead><tr><th>Unidad</th><th>Ventas activas</th><th>Compras</th><th>Ventas − compras*</th><th>Inventario**</th><th></th></tr></thead>
+            <tbody>{% for item in comparativo %}<tr>
+                <td>{{ item.nombre }}</td><td>{{ item.ventas|moneda }}</td><td>{{ item.compras|moneda }}</td><td>{{ item.utilidad_bruta_estimada|moneda }}</td><td>{{ item.inventario_costo_estimado|moneda }}</td>
+                <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('reportes', empresa_id=empresa_id, unidad_id=item.id, desde=desde, hasta=hasta) }}">Ver unidad</a></td>
+            </tr>{% endfor %}</tbody>
+        </table></div>
+        <div class="card-footer small text-muted">*Indicador simple que no equivale a utilidad contable. **Inventario al momento de consulta, no histórico al fin del período.</div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100"><div class="card-header"><strong>Ventas activas del período</strong></div><div class="table-responsive"><table class="table table-sm table-hover mb-0"><thead><tr><th>Fecha</th><th>Folio</th><th>Unidad</th><th>Total</th><th>Pago</th></tr></thead><tbody>
+            {% for venta in ventas %}<tr><td>{{ venta.fecha.strftime('%d/%m/%Y') }}</td><td>{{ venta.numero_venta }}</td><td>{{ venta.unidad.nombre }}</td><td>{{ venta.total|moneda }}</td><td>{{ venta.metodo_pago or 'No registrado' }}</td>{% else %}<tr><td colspan="5" class="text-center text-muted py-3">Sin ventas activas registradas en el período.</td></tr>{% endfor %}
+            </tbody></table></div><div class="card-footer small text-muted">Se muestran hasta 100 ventas. Usa Excel para descargar el período completo.</div></div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100"><div class="card-header"><strong>Compras registradas del período</strong></div><div class="table-responsive"><table class="table table-sm table-hover mb-0"><thead><tr><th>Fecha</th><th>Folio</th><th>Unidad</th><th>Total</th></tr></thead><tbody>
+            {% for compra in compras %}<tr><td>{{ compra.fecha.strftime('%d/%m/%Y') }}</td><td>{{ compra.numero_compra }}</td><td>{{ compra.unidad.nombre }}</td><td>{{ compra.total|moneda }}</td>{% else %}<tr><td colspan="4" class="text-center text-muted py-3">Sin compras registradas en el período.</td></tr>{% endfor %}
+            </tbody></table></div><div class="card-footer small text-muted">Las compras registradas no necesariamente son el costo de venta del período.</div></div>
+        </div>
+    </div>
+    <div class="alert alert-warning mt-4 mb-0"><strong>Nota:</strong> SMUNE presenta aquí ventas, compras, movimientos de caja e inventario que sí están guardados. El sistema aún no tiene un libro de gastos, conciliación de cobros ni costo histórico de ventas suficiente para emitir estados contables o utilidad neta.</div>
+</div>
+{% endblock %}

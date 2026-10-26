@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block contenido %}
+<div class="container">
+    <h2>Cambiar Producto - {{ apartado.numero_apartado }}</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label>Producto a cambiar</label>
+            <select name="detalle_id" class="form-select" required>
+                <option value="">Selecciona</option>
+                {% for d in apartado.detalles %}
+                <option value="{{ d.id }}">{{ d.producto.nombre }} - Cant: {{ d.cantidad }} - ${{ d.precio_unitario }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Cantidad a cambiar</label>
+            <input type="number" name="cantidad" class="form-control" min="1" required>
+        </div>
+        <div class="mb-3">
+            <label>Nuevo producto</label>
+            <select name="producto_id" class="form-select" required>
+                <option value="">Selecciona</option>
+                {% for p in productos %}
+                <option value="{{ p.id }}">{{ p.nombre }} - Stock: {{ p.stock }} - ${{ p.precio }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-warning">Confirmar Cambio</button>
+        <a href="{{ url_for('detalle_apartado', id=apartado.id) }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

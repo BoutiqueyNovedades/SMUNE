@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Editar empresa{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="bi bi-building-gear"></i> Editar empresa</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="nombre">Nombre comercial</label>
+                        <input id="nombre" class="form-control" name="nombre" value="{{ empresa.nombre }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="razon_social">Razón social</label>
+                        <input id="razon_social" class="form-control" name="razon_social" value="{{ empresa.razon_social or '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="giro">Giro o actividad</label>
+                        <select id="giro" class="form-select" name="giro" required>
+                            {% for codigo, nombre_giro in giros_empresa.items() %}
+                            <option value="{{ codigo }}" {% if empresa.giro == codigo %}selected{% endif %}>{{ nombre_giro }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="rfc">RFC</label>
+                        <input id="rfc" class="form-control" name="rfc" value="{{ empresa.rfc or '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="telefono">Teléfono</label>
+                        <input id="telefono" class="form-control" name="telefono" value="{{ empresa.telefono or '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="correo">Correo</label>
+                        <input id="correo" type="email" class="form-control" name="correo" value="{{ empresa.correo or '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="codigo_postal">Código postal</label>
+                        <input id="codigo_postal" class="form-control" name="codigo_postal" value="{{ empresa.codigo_postal or '' }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="direccion">Dirección</label>
+                        <textarea id="direccion" class="form-control" name="direccion" rows="2">{{ empresa.direccion or '' }}</textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="ciudad">Ciudad</label>
+                        <input id="ciudad" class="form-control" name="ciudad" value="{{ empresa.ciudad or '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="estado">Estado</label>
+                        <input id="estado" class="form-control" name="estado" value="{{ empresa.estado or '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="pais">País</label>
+                        <input id="pais" class="form-control" name="pais" value="{{ empresa.pais or 'México' }}">
+                    </div>
+                </div>
+                <hr>
+                <button class="btn btn-success" type="submit"><i class="bi bi-save"></i> Guardar cambios</button>
+                <a class="btn btn-secondary" href="{{ url_for('administrar_empresa', id=empresa.id) }}">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

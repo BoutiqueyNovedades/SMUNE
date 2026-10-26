@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}
+Inventario
+{% endblock %}
+
+{% block contenido %}
+
+<div class="d-flex justify-content-between mb-3">
+
+<h2>
+
+Movimientos de Inventario
+
+</h2>
+
+</div>
+
+<table class="table table-bordered table-striped"
+id="tabla">
+
+<thead>
+
+<tr>
+
+<th>Fecha</th>
+
+<th>Producto</th>
+
+<th>Movimiento</th>
+
+<th>Cantidad</th>
+
+<th>Referencia</th>
+
+<th>Usuario</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for m in movimientos %}
+
+<tr>
+
+<td>
+
+{{ m.fecha.strftime("%d/%m/%Y %H:%M") }}
+
+</td>
+
+<td>
+
+{{ m.producto.nombre }}
+
+</td>
+
+<td>
+
+{{ m.tipo }}
+
+</td>
+
+<td>
+
+{{ m.cantidad }}
+
+</td>
+
+<td>
+
+{{ m.referencia }}
+
+</td>
+
+<td>
+
+{{ m.usuario.nombre }}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+$(document).ready(function(){
+
+$('#tabla').DataTable({
+
+language:{
+url:'//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+}
+
+});
+
+});
+
+</script>
+
+{% endblock %}

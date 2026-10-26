@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Roles · {{ empresa.nombre }}{% endblock %}
+{% block contenido %}
+<div class="container-fluid py-4">
+    <nav aria-label="Ruta"><ol class="breadcrumb">
+        {% if current_user.administrador_principal %}<li class="breadcrumb-item"><a href="{{ url_for('panel_corporativo') }}">Empresas</a></li>{% endif %}
+        <li class="breadcrumb-item"><a href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}">{{ empresa.nombre }}</a></li>
+        <li class="breadcrumb-item active">Roles y permisos</li>
+    </ol></nav>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div><h2 class="fw-bold"><i class="bi bi-shield-lock text-primary"></i> Roles personalizados</h2><p class="text-muted mb-0">Plantillas reutilizables para usuarios de las sucursales de {{ empresa.nombre }}.</p></div>
+        <a class="btn btn-outline-secondary" href="{{ url_for('administrar_empresa', id=empresa.id) }}">Volver a administración</a>
+    </div>
+    <div class="row g-4">
+        <div class="col-xl-5">
+            <div class="card shadow-sm"><div class="card-header"><strong>Crear rol</strong></div><div class="card-body">
+                <form method="POST">
+                    <div class="mb-3"><label class="form-label" for="nombre">Nombre del rol</label><input class="form-control" id="nombre" name="nombre" maxlength="60" required placeholder="Ej. Encargado de caja"></div>
+                    <fieldset><legend class="fs-6">Permisos de módulos</legend>
+                        {% for codigo, modulo in catalogo.items() %}
+                        <div class="form-check"><input class="form-check-input" type="checkbox" name="modulos" value="{{ codigo }}" id="rol_mod_{{ codigo }}"><label class="form-check-label" for="rol_mod_{{ codigo }}">{{ modulo.nombre }}</label></div>
+                        {% else %}<p class="text-muted">No hay módulos disponibles que puedas delegar.</p>{% endfor %}
+                    </fieldset>
+                    <div class="form-text mt-2">Un rol solo concede los módulos habilitados y autorizados para tu cuenta. Los permisos se vuelven a comprobar en cada ruta.</div>
+                    <button class="btn btn-primary mt-3" type="submit" {% if not catalogo %}disabled{% endif %}><i class="bi bi-plus-circle"></i> Crear rol</button>
+                </form>
+            </div></div>
+        </div>
+        <div class="col-xl-7">
+            <div class="card shadow-sm"><div class="card-header"><strong>Roles de la empresa</strong></div>
+                {% if roles %}<div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Rol</th><th>Módulos autorizados</th><th></th></tr></thead><tbody>
+                    {% for rol in roles %}<tr><td class="fw-semibold">{{ rol.nombre }}</td><td>{% for codigo in rol.modulos_json|loads_json %}<span class="badge text-bg-light border me-1">{{ catalogo_modulos_empresa.get(codigo, {}).get('nombre', codigo) }}</span>{% endfor %}</td><td class="text-end"><form method="POST" action="{{ url_for('eliminar_rol_empresa', id=empresa.id, rol_id=rol.id) }}" onsubmit="return confirm('Eliminar esta plantilla de rol? Las cuentas existentes conservarán sus permisos.');"><button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button></form></td></tr>{% endfor %}
+                </tbody></table></div>{% else %}<div class="card-body text-muted">Aún no hay roles personalizados. Los roles estándar gerente, supervisor y empleado siguen disponibles.</div>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% if unidades_sel %}
+<form method="get" class="d-flex align-items-center gap-2 mb-3">
+    {% for k, v in request.args.items() if k != 'unidad_id' %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+    <label class="fw-semibold">Unidad:</label>
+    <select name="unidad_id" class="form-select w-auto" onchange="this.form.submit()">
+        {% for u in unidades_sel %}
+        <option value="{{ u.id }}" {{ 'selected' if u.id == unidad.id }}>{{ u.empresa.nombre }} — {{ u.nombre }}</option>
+        {% endfor %}
+    </select>
+</form>
+{% else %}
+<p class="text-muted mb-3"><i class="bi bi-shop"></i> {{ unidad.nombre }}</p>
+{% endif %}
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+{% for cat, m in mensajes %}<div class="alert alert-{{ cat }}">{{ m }}</div>{% endfor %}
+{% endwith %}

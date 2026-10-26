@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>Órdenes de producción</h3>
+    {% include "_giro_selector.html" %}
+    <form method="post" action="{{ url_for('fab_orden_nueva') }}" class="row g-2 mb-4">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-3"><select class="form-select" name="producto_id" required>
+            {% for p in productos %}<option value="{{ p.id }}">{{ p.nombre }}</option>{% endfor %}
+        </select></div>
+        <div class="col-md-1"><input class="form-control" name="cantidad" type="number" min="1" value="1"></div>
+        <div class="col-md-3"><select class="form-select" name="cliente_id"><option value="">Sin cliente (stock)</option>
+            {% for c in clientes %}<option value="{{ c.id }}">{{ c.nombre }}</option>{% endfor %}</select></div>
+        <div class="col-md-2"><input class="form-control" type="date" name="fecha_entrega"></div>
+        <div class="col-md-2"><input class="form-control" name="notas" placeholder="Notas"></div>
+        <div class="col-md-1"><button class="btn btn-primary">Crear</button></div>
+    </form>
+    {% if not productos %}<div class="alert alert-info">Defina primero una lista de materiales para un producto.</div>{% endif %}
+    <table class="table table-sm table-striped">
+        <thead><tr><th>Folio</th><th>Producto</th><th>Cant.</th><th>Estado</th><th>Cliente</th><th>Entrega</th><th></th></tr></thead>
+        <tbody>
+        {% for o in ordenes %}
+        <tr><td>{{ o.folio }}</td><td>{{ o.producto.nombre }}</td><td>{{ o.cantidad }}</td><td>{{ o.estado }}</td>
+            <td>{{ o.cliente.nombre if o.cliente else '—' }}</td><td>{{ o.fecha_entrega or '—' }}</td>
+            <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('fab_orden', id=o.id) }}">Ver</a></td></tr>
+        {% else %}<tr><td colspan="7" class="text-muted">Sin órdenes.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

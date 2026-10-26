@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h3>Seleccione una unidad de negocio</h3>
+    <div class="list-group" style="max-width:500px">
+        {% for u in unidades %}
+        <a class="list-group-item list-group-item-action" href="?unidad_id={{ u.id }}">{{ u.empresa.nombre }} — {{ u.nombre }}</a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

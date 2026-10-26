@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ unidad.nombre }} · SMUNE{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <nav aria-label="Ruta"><ol class="breadcrumb mb-2">
+                {% if current_user.administrador_principal %}<li class="breadcrumb-item"><a href="{{ url_for('panel_corporativo') }}">Empresas</a></li>{% endif %}
+                {% if current_user.administrador_principal or current_user.rol == 'GERENTE_EMPRESA' %}<li class="breadcrumb-item"><a href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}">{{ empresa.nombre }}</a></li>{% else %}<li class="breadcrumb-item">{{ empresa.nombre }}</li>{% endif %}
+                <li class="breadcrumb-item active" aria-current="page">{{ unidad.nombre }}</li>
+            </ol></nav>
+            <h2 class="fw-bold mb-0"><i class="bi bi-shop"></i> {{ unidad.nombre }}</h2>
+            <p class="text-muted mb-0">Unidad de negocio · {{ empresa.nombre }}</p>
+        </div>
+        {% if current_user.administrador_principal or current_user.rol == 'GERENTE_EMPRESA' %}<a class="btn btn-outline-secondary" href="{{ url_for('panel_corporativo_empresa', id=empresa.id) }}"><i class="bi bi-arrow-left"></i> Sucursales</a>{% else %}<a class="btn btn-outline-secondary" href="{{ url_for('dashboard') }}"><i class="bi bi-arrow-left"></i> Dashboard</a>{% endif %}
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Ventas activas (año a la fecha)</small><h4>{{ metricas.ventas|moneda }}</h4></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Compras registradas</small><h4>{{ metricas.compras|moneda }}</h4></div></div></div>
+        <div class="col-sm-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Inventario a costo promedio</small><h4>{{ metricas.inventario_costo_estimado|moneda }}</h4></div></div></div>
+        {% if puede_gestionar_usuarios %}<div class="col-sm-6 col-xl-3"><div class="card shadow-sm h-100"><div class="card-body"><small class="text-muted">Usuarios · productos · clientes</small><h4>{{ usuarios|length }} · {{ total_productos }} · {{ total_clientes }}</h4></div></div></div>{% endif %}
+    </div>
+    <div class="alert alert-info py-2">Ventas menos compras registradas: <strong>{{ metricas.utilidad_bruta_estimada|moneda }}</strong>. Indicador orientativo, no utilidad neta.</div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        {% if puede_ver_reportes %}
+        <a class="btn btn-primary" href="{{ url_for('reportes', empresa_id=empresa.id, unidad_id=unidad.id) }}"><i class="bi bi-file-earmark-bar-graph"></i> Reportes de esta unidad</a>
+        {% endif %}
+        {% if puede_ver_analisis %}
+        <a class="btn btn-outline-primary" href="{{ url_for('analisis_datos', empresa_id=empresa.id, unidad_id=unidad.id) }}"><i class="bi bi-graph-up-arrow"></i> Análisis de datos</a>
+        {% endif %}
+        {% if puede_gestionar_usuarios %}
+        <a class="btn btn-outline-secondary" href="{{ url_for('usuarios_unidad', id=unidad.id) }}"><i class="bi bi-shield-lock"></i> Usuarios y seguridad</a>
+        {% endif %}
+        {% if puede_configurar_unidad %}
+        <a class="btn btn-outline-secondary" href="{{ url_for('administrar_unidad', id=unidad.id) }}"><i class="bi bi-gear"></i> Configuración de unidad</a>
+        {% endif %}
+    </div>
+
+    {% if puede_ver_reportes %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><strong><i class="bi bi-folder2-open"></i> Detalle de la sucursal</strong></div>
+        <div class="card-body d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='ventas') }}">Ventas ({{ total_ventas }})</a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='compras') }}">Compras ({{ total_compras }})</a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='productos') }}">Productos ({{ total_productos }})</a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='clientes') }}">Clientes ({{ total_clientes }})</a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='proveedores') }}">Proveedores</a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='apartados') }}">Apartados ({{ total_apartados }})</a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='usuarios') }}">Usuarios ({{ usuarios|length }})</a>
+            <a class="btn btn-outline-dark btn-sm" href="{{ url_for('unidad_seccion', id=unidad.id, seccion='cajas') }}">Caja e historial ({{ total_cajas }})</a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if puede_gestionar_usuarios %}
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong><i class="bi bi-diagram-3"></i> Funciones de la sucursal</strong>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">Esta sucursal tiene <strong>{{ usuarios|length }}</strong> cuentas de usuario. Los roles, estados, contraseñas y permisos se gestionan en la pantalla de usuarios.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

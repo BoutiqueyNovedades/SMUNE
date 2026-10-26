@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mt-3"><i class="bi bi-gear"></i> Configuración de la unidad</h3>
+<div class="card mt-3"><div class="card-body">
+  <table class="table table-sm mb-0">
+    <tr><th>Fidelización</th><td>{{ 'Activa' if config.fidelidad_activa else 'Inactiva' }}</td></tr>
+    <tr><th>Puntos por peso</th><td>{{ config.puntos_por_peso }}</td></tr>
+    <tr><th>Mayoreo</th><td>{{ 'Activo' if config.mayoreo_activo else 'Inactivo' }}</td></tr>
+    <tr><th>Descuentos 3-5 / 6-10 / 11+</th><td>{{ config.descuento_3_5 }}% / {{ config.descuento_6_10 }}% / {{ config.descuento_11_mas }}%</td></tr>
+    <tr><th>Anticipo mínimo apartados</th><td>{{ config.anticipo_minimo_porcentaje }}%</td></tr>
+  </table>
+</div></div>
+{% endblock %}

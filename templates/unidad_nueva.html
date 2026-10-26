@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nueva Unidad
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container mt-4">
+
+<div class="card shadow">
+
+<div class="card-header bg-success text-white">
+
+<h3>
+
+Nueva Unidad de Negocio
+
+</h3>
+
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label>Empresa</label>
+
+<input
+class="form-control"
+value="{{ empresa.nombre }}"
+readonly>
+
+</div>
+
+<div class="mb-3">
+
+<label>Nombre de la Unidad</label>
+
+<input
+class="form-control"
+name="nombre"
+required>
+
+</div>
+
+<div class="mb-3">
+
+<label>Dirección</label>
+
+<textarea
+class="form-control"
+name="direccion"></textarea>
+
+</div>
+
+<div class="mb-3">
+
+<label>Teléfono</label>
+
+<input
+class="form-control"
+name="telefono">
+
+</div>
+
+<div class="mb-3">
+
+<label>Correo</label>
+
+<input
+type="email"
+class="form-control"
+name="correo">
+
+</div>
+
+<div class="text-end">
+
+<button
+class="btn btn-success">
+
+Guardar Unidad
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

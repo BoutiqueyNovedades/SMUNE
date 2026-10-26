@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <a href="{{ url_for('rest_pedidos') }}">&larr; Pedidos</a>
+    <h3>{{ p.folio }} <small class="badge bg-info">{{ p.estado }}</small></h3>
+    {% include "_giro_selector.html" %}
+    <p>{{ p.tipo }}{% if p.mesa %} · Mesa {{ p.mesa.nombre }}{% endif %}{% if p.cliente_nombre %} · {{ p.cliente_nombre }}{% endif %}{% if p.direccion %} · {{ p.direccion }}{% endif %}</p>
+    {% if abierto %}
+    <form method="post" action="{{ url_for('rest_pedido_agregar', id=p.id) }}" class="row g-2 mb-3">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-4"><select class="form-select" name="platillo_id">
+            {% for pl in platillos %}<option value="{{ pl.id }}">{{ pl.nombre }} — ${{ '%.2f'|format(pl.precio) }}</option>{% endfor %}
+        </select></div>
+        <div class="col-md-2"><input class="form-control" name="cantidad" type="number" min="1" value="1"></div>
+        <div class="col-md-4"><input class="form-control" name="nota" placeholder="Nota / modificador"></div>
+        <div class="col-md-2"><button class="btn btn-primary">Agregar</button></div>
+    </form>
+    {% endif %}
+    <table class="table table-sm">
+        <thead><tr><th>Artículo</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th>Cocina</th><th></th></tr></thead>
+        <tbody>
+        {% for d in p.detalles %}
+        <tr><td>{{ d.nombre }}{% if d.nota %}<br><small class="text-muted">{{ d.nota }}</small>{% endif %}</td><td>{{ d.cantidad }}</td>
+            <td>${{ '%.2f'|format(d.precio) }}</td><td>${{ '%.2f'|format(d.cantidad * d.precio) }}</td>
+            <td>{{ d.estado_cocina if d.enviado else 'Sin enviar' }}</td>
+            <td>{% if abierto and not d.enviado %}<form method="post" action="{{ url_for('rest_pedido_quitar', id=p.id, det_id=d.id) }}"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-sm btn-outline-danger">Quitar</button></form>{% endif %}</td></tr>
+        {% endfor %}
+        </tbody>
+        <tfoot><tr><th colspan="3" class="text-end">Total</th><th>${{ '%.2f'|format(p.total) }}</th><th colspan="2"></th></tr></tfoot>
+    </table>
+    {% if p.estado == 'PAGADO' %}
+    <div class="alert alert-success">Pagado con {{ p.metodo_pago }}{% if p.propina %} · propina ${{ '%.2f'|format(p.propina) }}{% endif %}</div>
+    {% elif abierto %}
+    <div class="d-flex flex-wrap gap-2">
+        <form method="post" action="{{ url_for('rest_pedido_enviar', id=p.id) }}"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-warning">Enviar a cocina</button></form>
+        <form method="post" action="{{ url_for('rest_pedido_entregar', id=p.id) }}"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-outline-success">Marcar entregado</button></form>
+        <form method="post" action="{{ url_for('rest_pedido_cancelar', id=p.id) }}" onsubmit="return confirm('¿Cancelar pedido?')"><input type="hidden" name="unidad_id" value="{{ unidad.id }}"><button class="btn btn-outline-danger">Cancelar</button></form>
+    </div>
+    <form method="post" action="{{ url_for('rest_pedido_cobrar', id=p.id) }}" class="row g-2 mt-3">
+        <input type="hidden" name="unidad_id" value="{{ unidad.id }}">
+        <div class="col-md-3"><select class="form-select" name="metodo_pago">{% for m in metodos %}<option>{{ m }}</option>{% endfor %}</select></div>
+        <div class="col-md-3"><input class="form-control" name="propina" type="number" step="0.01" min="0" placeholder="Propina"></div>
+        <div class="col-md-3"><button class="btn btn-success">Cobrar</button></div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

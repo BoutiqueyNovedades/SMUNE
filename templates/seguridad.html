@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mt-3"><h3><i class="bi bi-shield-lock"></i> Seguridad - Usuarios</h3>
+<a href="#" class="btn btn-primary disabled">Nuevo (solo ADMIN principal)</a></div>
+
+<div class="card mt-3"><div class="card-body">
+<table class="table">
+<thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Unidad</th><th>Activo</th></tr></thead>
+<tbody>
+{% for u in usuarios %}
+<tr><td>{{ u.usuario }}</td><td>{{ u.nombre }}</td><td>{{ u.rol }}</td><td>{{ u.unidad_negocio_id }}</td><td>{{ 'Sí' if u.activo else 'No' }}</td></tr>
+{% else %}
+<tr><td colspan="5">No hay usuarios</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div></div>
+{% endblock %}

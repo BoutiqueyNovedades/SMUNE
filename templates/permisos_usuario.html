@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}
+Permisos de Usuario
+{% endblock %}
+
+{% block contenido %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold">
+
+                <i class="bi bi-shield-lock"></i>
+
+                Permisos de Usuario
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                Usuario:
+                <strong>
+                    {{ usuario.nombre }}
+                </strong>
+
+                |
+
+                Usuario:
+                <strong>
+                    {{ usuario.usuario }}
+                </strong>
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <a
+                href="{% if retorno_unidad_id %}{{ url_for('usuarios_unidad', id=retorno_unidad_id) }}{% else %}{{ url_for('usuarios') }}{% endif %}"
+                class="btn btn-secondary"
+            >
+
+                <i class="bi bi-arrow-left"></i>
+
+                Regresar
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h5 class="mb-0">
+
+                <i class="bi bi-person-lock"></i>
+
+                Módulos autorizados
+
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="row">
+
+                    {% for modulo in modulos %}
+
+                    <div class="col-md-4 mb-3">
+
+                        <div class="form-check form-switch">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="{{ modulo }}"
+                                value="1"
+                                id="modulo_{{ loop.index }}"
+                                {% if modulo in permisos_seleccionados %}
+                                checked
+                                {% endif %}
+                            >
+
+                            <label
+                                class="form-check-label"
+                                for="modulo_{{ loop.index }}"
+                            >
+
+                                {{ modulo }}
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <hr>
+
+
+                <div class="d-flex gap-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-success"
+                    >
+
+                        <i class="bi bi-save"></i>
+
+                        Guardar permisos
+
+                    </button>
+
+                    <a
+                        href="{% if retorno_unidad_id %}{{ url_for('usuarios_unidad', id=retorno_unidad_id) }}{% else %}{{ url_for('usuarios') }}{% endif %}"
+                        class="btn btn-secondary"
+                    >
+
+                        Cancelar
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

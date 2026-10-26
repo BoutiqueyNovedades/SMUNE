@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Mi perfil · SMUNE{% endblock %}
+{% block contenido %}
+<div class="container-fluid py-4">
+    <div class="mb-4"><h2 class="fw-bold"><i class="bi bi-person-circle text-primary"></i> Mi perfil</h2><p class="text-muted mb-0">Tu cuenta, alcance de acceso y permisos vigentes.</p></div>
+    <div class="row g-4">
+        <div class="col-xl-5">
+            <div class="card shadow-sm h-100"><div class="card-header"><strong>Cuenta</strong></div><div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Nombre</dt><dd class="col-sm-8">{{ current_user.nombre }}</dd>
+                    <dt class="col-sm-4">Usuario</dt><dd class="col-sm-8">{{ current_user.usuario }}</dd>
+                    <dt class="col-sm-4">Rol</dt><dd class="col-sm-8">{% if current_user.administrador_principal %}Administrador Principal{% else %}{{ current_user.rol.replace('_', ' ').title() }}{% endif %}</dd>
+                    <dt class="col-sm-4">Empresa</dt><dd class="col-sm-8">{{ current_user.empresa.nombre if current_user.empresa else 'Acceso universal' }}</dd>
+                    <dt class="col-sm-4">Unidad</dt><dd class="col-sm-8">{{ current_user.unidad.nombre if current_user.unidad else 'Todas las unidades autorizadas' }}</dd>
+                    <dt class="col-sm-4">Estado</dt><dd class="col-sm-8"><span class="badge text-bg-success">Activo</span></dd>
+                </dl>
+                <a class="btn btn-outline-primary mt-3" href="{{ url_for('cambiar_password') }}"><i class="bi bi-key"></i> Cambiar mi contraseña</a>
+            </div></div>
+        </div>
+        <div class="col-xl-7">
+            <div class="card shadow-sm mb-4"><div class="card-header"><strong>Permisos efectivos</strong></div><div class="card-body">
+                {% if current_user.administrador_principal %}<p class="mb-0">Acceso universal a todos los módulos y empresas.</p>
+                {% elif permisos %}<div class="d-flex flex-wrap gap-2">{% for permiso in permisos %}<span class="badge text-bg-primary">{{ permiso.replace('_', ' ') }}</span>{% endfor %}</div>
+                {% else %}<p class="text-muted mb-0">No tienes permisos de módulos asignados.</p>{% endif %}
+            </div></div>
+            <div class="card shadow-sm"><div class="card-header"><strong>Módulos habilitados para la empresa</strong></div><div class="card-body">
+                {% if current_user.administrador_principal %}<p class="mb-0">El acceso está disponible en función de la empresa seleccionada.</p>
+                {% elif modulos_activos %}<div class="d-flex flex-wrap gap-2">{% for modulo in modulos_activos %}<span class="badge text-bg-light border">{{ catalogo_modulos_empresa.get(modulo, {}).get('nombre', modulo.replace('_', ' ')) }}</span>{% endfor %}</div>
+                {% else %}<p class="text-muted mb-0">La empresa no tiene módulos habilitados.</p>{% endif %}
+            </div></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

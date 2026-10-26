@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo gerente corporativo{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="bi bi-person-badge"></i> Crear gerente corporativo</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Empresa asignada: <strong>{{ empresa.nombre }}</strong>. Esta cuenta podrá consultar el dashboard y el análisis consolidado de la empresa, pero no administrar unidades, cuentas o permisos.</p>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label" for="nombre">Nombre</label>
+                    <input class="form-control" id="nombre" name="nombre" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="usuario">Usuario de acceso</label>
+                    <input class="form-control" id="usuario" name="usuario" autocomplete="username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="password">Contraseña temporal</label>
+                    <input class="form-control" id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+                    <div class="form-text">Mínimo 8 caracteres. Se solicitará el cambio en el primer acceso.</div>
+                </div>
+                <fieldset class="mb-3">
+                    <legend class="fs-6 fw-semibold">Permisos de empresa</legend>
+                    {% for modulo, etiqueta in [('REPORTES', 'Reportes consolidados'), ('ANALISIS_DATOS', 'Análisis de datos'), ('SEGURIDAD', 'Administrar usuarios y permisos'), ('CONFIGURACION', 'Configurar empresa y sucursales')] %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="modulos" value="{{ modulo }}" id="gerente_{{ modulo }}" {% if modulo in ['REPORTES', 'ANALISIS_DATOS'] %}checked{% endif %}>
+                        <label class="form-check-label" for="gerente_{{ modulo }}">{{ etiqueta }}</label>
+                    </div>
+                    {% endfor %}
+                    <div class="form-text">Los permisos se aplican únicamente a esta empresa y sus sucursales.</div>
+                </fieldset>
+                <button class="btn btn-success" type="submit"><i class="bi bi-person-plus"></i> Crear cuenta</button>
+                <a class="btn btn-secondary" href="{{ url_for('administrar_empresa', id=empresa.id) }}">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
